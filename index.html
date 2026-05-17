@@ -557,12 +557,13 @@ document.getElementById('btnRegister').onclick = async () => {
   setLoading('btnRegister', 'Creating account…');
   try {
     const result = await createUserWithEmailAndPassword(auth, email, pass);
-    await setDoc(doc(db, 'users', result.user.uid), {
-      fullName: name, email, phone, userId, createdAt: new Date().toISOString()
-    });
-    alert('Account created! Welcome to BizBooks. Please sign in.');
-    resetBtn('btnRegister', 'Create Account');
-    showLogin();
+await setDoc(doc(db, 'users', result.user.uid), {
+    fullName: name, email, phone, userId, createdAt: new Date().toISOString()
+});
+await signOut(auth);
+alert('Account created! Welcome to BizBooks. Please sign in.');
+resetBtn('btnRegister', 'Create Account');
+showLogin();
   } catch (e) {
     setAuthStatus(e.message);
     resetBtn('btnRegister', 'Create Account');
