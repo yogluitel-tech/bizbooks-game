@@ -1,0 +1,1139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BizBooks — Accounting Game</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap');
+
+  :root {
+    --blue: #1a56db; --blue-light: #e8f0fe; --blue-dark: #1040a0;
+    --green: #1e7e34; --green-light: #e6f4ea; --green-dark: #145228;
+    --red: #b91c1c; --red-light: #fee2e2; --amber: #b45309; --amber-light: #fef3c7;
+    --gray-50: #f9fafb; --gray-100: #f3f4f6; --gray-200: #e5e7eb;
+    --gray-400: #9ca3af; --gray-600: #4b5563; --gray-800: #1f2937; --gray-900: #111827;
+    --surface: #fff; --bg: #f0f4ff;
+    --radius: 10px; --radius-lg: 16px;
+    --font: 'Sora', sans-serif; --mono: 'DM Mono', monospace;
+    --shadow: 0 1px 4px rgba(26,86,219,0.07), 0 0 0 0.5px rgba(26,86,219,0.10);
+    --primary-login: #27ae60;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: var(--font); background: var(--bg); color: var(--gray-800); min-height: 100vh; }
+
+  /* ══════════ LOGIN OVERLAY ══════════ */
+  #login-overlay {
+    position: fixed; inset: 0; background: var(--bg); z-index: 9999;
+    display: flex; align-items: center; justify-content: center;
+  }
+  #login-overlay.hidden { display: none; }
+
+  .auth-card {
+    background: white; padding: 40px; border-radius: 16px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.08); width: 100%; max-width: 400px;
+    margin: 1rem;
+  }
+  .auth-logo { text-align: center; margin-bottom: 20px; }
+  .auth-logo .logo-icon { font-size: 40px; display: block; margin-bottom: 6px; }
+  .auth-logo .logo-name { font-size: 22px; font-weight: 600; color: var(--blue); }
+
+  .auth-card h2 { margin: 0 0 6px; font-weight: 600; text-align: center; font-size: 18px; }
+  .auth-card p { text-align: center; font-size: 14px; color: var(--gray-400); margin-bottom: 24px; }
+
+  .auth-input-group { position: relative; margin-bottom: 12px; }
+  .auth-input-group input {
+    width: 100%; padding: 11px 14px; border: 1px solid var(--gray-200);
+    border-radius: var(--radius); font-family: var(--font); font-size: 14px;
+    color: var(--gray-800); background: var(--gray-50); transition: border-color 0.15s;
+  }
+  .auth-input-group input:focus { outline: none; border-color: var(--blue); background: #fff; }
+  .toggle-pw {
+    position: absolute; right: 12px; top: 50%; transform: translateY(-50%);
+    cursor: pointer; font-size: 11px; font-weight: 600; color: var(--blue);
+    user-select: none;
+  }
+
+  .auth-btn {
+    width: 100%; padding: 12px; border: none; border-radius: var(--radius);
+    font-family: var(--font); font-size: 15px; font-weight: 600;
+    cursor: pointer; transition: opacity 0.2s; margin-top: 8px;
+    background: var(--blue); color: #fff;
+  }
+  .auth-btn:hover { opacity: 0.9; }
+  .auth-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+  .auth-btn.google-btn {
+    background: white; color: #444; border: 1px solid var(--gray-200);
+    display: flex; align-items: center; justify-content: center; gap: 10px;
+    margin-top: 10px;
+  }
+  .auth-btn.google-btn img { width: 18px; }
+
+  .auth-footer { margin-top: 20px; text-align: center; font-size: 13px; border-top: 1px solid var(--gray-100); padding-top: 16px; }
+  .auth-link { color: var(--blue); cursor: pointer; font-weight: 600; }
+
+  #auth-status { margin-top: 14px; text-align: center; font-size: 13px; min-height: 18px; color: var(--red); }
+
+  .spinner {
+    display: inline-block; width: 12px; height: 12px;
+    border: 2px solid rgba(255,255,255,.3); border-radius: 50%;
+    border-top-color: #fff; animation: spin 0.8s linear infinite; margin-right: 6px;
+    vertical-align: middle;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* Signup extra inputs spacing */
+  #signupView input { margin-bottom: 10px; }
+
+  /* ══════════ GAME LAYOUT ══════════ */
+  #app { display: flex; flex-direction: column; min-height: 100vh; }
+  .topbar {
+    background: var(--surface); border-bottom: 1px solid var(--gray-200);
+    padding: 0 1.5rem; height: 56px; display: flex; align-items: center;
+    justify-content: space-between; position: sticky; top: 0; z-index: 100;
+  }
+  .topbar-brand { font-size: 17px; font-weight: 600; color: var(--blue); display: flex; align-items: center; gap: 8px; }
+  .topbar-brand span { font-size: 20px; }
+  .topbar-right { display: flex; align-items: center; gap: 6px; }
+  .topbar-user { font-size: 12px; color: var(--gray-400); padding: 0 8px; }
+  .tab-btn {
+    padding: 6px 14px; border-radius: var(--radius); border: 1px solid transparent;
+    background: transparent; cursor: pointer; font-family: var(--font); font-size: 13px;
+    font-weight: 500; color: var(--gray-600); transition: all 0.15s;
+  }
+  .tab-btn:hover { background: var(--gray-100); }
+  .tab-btn.active { background: var(--blue-light); color: var(--blue-dark); border-color: #c7d9fc; }
+  .tab-btn.logout { color: var(--red); }
+  .main { flex: 1; padding: 1.5rem; max-width: 780px; margin: 0 auto; width: 100%; }
+
+  /* ── Cards ── */
+  .card { background: var(--surface); border-radius: var(--radius-lg); box-shadow: var(--shadow); padding: 1.5rem; margin-bottom: 1rem; }
+  .card-sm { padding: 1rem 1.25rem; }
+
+  /* ── Buttons ── */
+  .btn { display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; border-radius: var(--radius); border: 1px solid var(--gray-200); background: var(--surface); color: var(--gray-800); font-family: var(--font); font-size: 13px; font-weight: 500; cursor: pointer; transition: all 0.15s; }
+  .btn:hover { background: var(--gray-100); }
+  .btn.primary { background: var(--blue); border-color: var(--blue); color: #fff; }
+  .btn.primary:hover { background: var(--blue-dark); }
+  .btn.success { background: var(--green); border-color: var(--green); color: #fff; }
+  .btn.success:hover { background: var(--green-dark); }
+  .btn.danger { background: var(--red); border-color: var(--red); color: #fff; }
+  .btn.sm { padding: 5px 10px; font-size: 12px; }
+  .btn-row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 1rem; }
+
+  /* ── Forms ── */
+  label { font-size: 12px; font-weight: 500; color: var(--gray-600); display: block; margin-bottom: 4px; }
+  input[type=text], input[type=number], textarea, select {
+    width: 100%; padding: 8px 10px; border: 1px solid var(--gray-200); border-radius: var(--radius);
+    font-family: var(--font); font-size: 13px; color: var(--gray-800); background: var(--gray-50);
+    transition: border-color 0.15s;
+  }
+  input:focus, textarea:focus, select:focus { outline: none; border-color: var(--blue); background: #fff; }
+  textarea { resize: vertical; min-height: 70px; }
+  .field { margin-bottom: 12px; }
+  .field-row { display: grid; gap: 10px; }
+  .field-row.cols2 { grid-template-columns: 1fr 1fr; }
+  .field-row.cols3 { grid-template-columns: 1fr 1fr 1fr; }
+
+  /* ── Progress ── */
+  .progress-wrap { display: flex; gap: 6px; margin-bottom: 1.25rem; }
+  .progress-seg { flex: 1; height: 5px; border-radius: 3px; background: var(--gray-200); transition: background 0.3s; }
+  .progress-seg.done { background: var(--blue); }
+  .progress-seg.active { background: #6ea3f7; }
+
+  /* ── Stats bar ── */
+  .stats-bar { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 1.25rem; }
+  .stat-box { background: var(--surface); border-radius: var(--radius); padding: 10px 12px; box-shadow: var(--shadow); }
+  .stat-box .lbl { font-size: 11px; color: var(--gray-400); margin-bottom: 2px; }
+  .stat-box .val { font-size: 18px; font-weight: 600; color: var(--gray-800); }
+
+  /* ── NPC bubble ── */
+  .npc { display: flex; gap: 10px; align-items: flex-start; margin-bottom: 1rem; }
+  .avatar { width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 13px; flex-shrink: 0; }
+  .av-mr { background: var(--blue-light); color: var(--blue-dark); }
+  .av-sp { background: var(--green-light); color: var(--green-dark); }
+  .bubble { background: var(--gray-50); border: 1px solid var(--gray-200); border-radius: 0 var(--radius-lg) var(--radius-lg) var(--radius-lg); padding: 10px 14px; font-size: 14px; line-height: 1.6; flex: 1; }
+
+  /* ── Transaction mini-game ── */
+  .txn-entry { display: flex; gap: 8px; align-items: flex-end; flex-wrap: wrap; margin: 1rem 0; }
+  .badge { display: inline-block; font-size: 11px; font-weight: 500; padding: 2px 8px; border-radius: 20px; }
+  .badge-dr { background: var(--blue-light); color: var(--blue-dark); }
+  .badge-cr { background: var(--green-light); color: var(--green-dark); }
+  .feedback { padding: 10px 14px; border-radius: var(--radius); font-size: 13px; margin-top: 10px; }
+  .fb-ok { background: var(--green-light); color: var(--green-dark); border: 1px solid #a7d7b5; }
+  .fb-err { background: var(--red-light); color: var(--red); border: 1px solid #fca5a5; }
+
+  /* ── Decision ── */
+  .choice { display: block; width: 100%; text-align: left; padding: 11px 14px; margin-bottom: 8px; border: 1px solid var(--gray-200); border-radius: var(--radius); background: var(--surface); font-family: var(--font); font-size: 13px; cursor: pointer; transition: all 0.15s; }
+  .choice:hover:not(:disabled) { background: var(--blue-light); border-color: #c7d9fc; }
+  .choice.good { background: var(--green-light); border-color: #86efac; color: var(--green-dark); }
+  .choice.bad { background: var(--red-light); border-color: #fca5a5; color: var(--red); }
+
+  /* ── Financial statements ── */
+  .fs-classify { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--gray-100); gap: 8px; }
+  .fs-classify .item-lbl { font-size: 13px; flex: 1; }
+  .fs-classify select { width: auto; flex-shrink: 0; font-size: 12px; padding: 4px 8px; }
+  .fs-row { display: flex; justify-content: space-between; font-size: 13px; padding: 4px 0; border-bottom: 1px solid var(--gray-100); }
+  .fs-total { display: flex; justify-content: space-between; font-size: 13px; font-weight: 600; padding: 8px 0; border-top: 2px solid var(--gray-200); margin-top: 4px; }
+  .fs-section-title { font-size: 11px; font-weight: 600; color: var(--gray-400); text-transform: uppercase; letter-spacing: 0.05em; margin: 12px 0 6px; }
+
+  /* ── Results ── */
+  .score-circle { width: 90px; height: 90px; border-radius: 50%; background: var(--blue-light); border: 3px solid #c7d9fc; display: flex; flex-direction: column; align-items: center; justify-content: center; margin: 0 auto 1rem; }
+  .score-circle .num { font-size: 24px; font-weight: 600; color: var(--blue-dark); }
+  .score-circle .lbl { font-size: 11px; color: var(--blue); }
+
+  /* ── Level list ── */
+  .level-item { display: flex; align-items: center; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--gray-100); }
+  .level-item:last-child { border-bottom: none; }
+  .level-num { width: 28px; height: 28px; border-radius: 50%; background: var(--blue-light); color: var(--blue-dark); display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; flex-shrink: 0; }
+  .level-info { flex: 1; }
+  .level-info .name { font-size: 14px; font-weight: 500; }
+  .level-info .meta { font-size: 12px; color: var(--gray-400); }
+  .level-actions { display: flex; gap: 6px; }
+
+  /* ── Editor sections ── */
+  .editor-section { border: 1px solid var(--gray-200); border-radius: var(--radius); margin-bottom: 10px; overflow: hidden; }
+  .editor-section-head { padding: 10px 14px; background: var(--gray-50); display: flex; justify-content: space-between; align-items: center; cursor: pointer; font-size: 13px; font-weight: 500; }
+  .editor-section-body { padding: 14px; border-top: 1px solid var(--gray-200); }
+  .sub-item { background: var(--gray-50); border: 1px solid var(--gray-200); border-radius: var(--radius); padding: 12px; margin-bottom: 8px; position: relative; }
+  .sub-item .remove-btn { position: absolute; top: 8px; right: 8px; }
+
+  /* ── Misc ── */
+  h2 { font-size: 18px; font-weight: 600; margin-bottom: 10px; }
+  h3 { font-size: 15px; font-weight: 600; margin-bottom: 8px; }
+  p { font-size: 14px; line-height: 1.6; color: var(--gray-600); margin-bottom: 8px; }
+  .tag { display: inline-block; font-size: 11px; padding: 2px 8px; border-radius: 20px; background: var(--blue-light); color: var(--blue-dark); font-weight: 500; }
+  .divider { border: none; border-top: 1px solid var(--gray-100); margin: 1rem 0; }
+  .hidden { display: none !important; }
+  .text-center { text-align: center; }
+  .text-muted { color: var(--gray-400); font-size: 13px; }
+
+  /* page sections */
+  .page { display: none; }
+  .page.active { display: block; }
+</style>
+</head>
+<body>
+
+<!-- ══════════ LOGIN OVERLAY ══════════ -->
+<div id="login-overlay">
+  <div class="auth-card">
+    <div class="auth-logo">
+      <span class="logo-icon">📒</span>
+      <span class="logo-name">BizBooks</span>
+    </div>
+
+    <!-- Login View -->
+    <div id="loginView">
+      <h2>Welcome Back</h2>
+      <p>Sign in to access your account.</p>
+      <div class="auth-input-group">
+        <input type="text" id="loginUser" placeholder="User ID">
+      </div>
+      <div class="auth-input-group">
+        <input type="password" id="loginPass" placeholder="Password">
+        <span class="toggle-pw" onclick="togglePw('loginPass')">SHOW</span>
+      </div>
+      <button class="auth-btn" id="btnLogin">Sign In →</button>
+      <button class="auth-btn google-btn" id="btnGoogle">
+        <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google">
+        Continue with Google
+      </button>
+      <div class="auth-footer">
+        <span class="auth-link" onclick="forgotPass()">Forgot Password?</span>
+        &nbsp;·&nbsp;
+        <span class="auth-link" onclick="showSignup()">Create an Account</span>
+      </div>
+    </div>
+
+    <!-- Signup View -->
+    <div id="signupView" style="display:none">
+      <h2>Join BizBooks</h2>
+      <p>Fill in your details to get started.</p>
+      <div class="auth-input-group"><input type="text" id="regName" placeholder="Full Name"></div>
+      <div class="auth-input-group"><input type="email" id="regEmail" placeholder="Email Address"></div>
+      <div class="auth-input-group"><input type="text" id="regPhone" placeholder="Phone Number"></div>
+      <div class="auth-input-group"><input type="text" id="regUser" placeholder="Create User ID"></div>
+      <div class="auth-input-group">
+        <input type="password" id="regPass" placeholder="Create Password">
+        <span class="toggle-pw" onclick="togglePw('regPass')">SHOW</span>
+      </div>
+      <div class="auth-input-group">
+        <input type="password" id="regConfirm" placeholder="Confirm Password">
+      </div>
+      <button class="auth-btn" id="btnRegister">Create Account</button>
+      <div class="auth-footer">
+        <span class="auth-link" onclick="showLogin()">Already have an account? Sign In</span>
+      </div>
+    </div>
+
+    <div id="auth-status"></div>
+  </div>
+</div>
+
+<!-- ══════════ GAME APP ══════════ -->
+<div id="app">
+
+  <div class="topbar">
+    <div class="topbar-brand"><span>📒</span> BizBooks</div>
+    <div class="topbar-right">
+      <span class="topbar-user" id="topbar-user"></span>
+      <button class="tab-btn active" onclick="showPage('play')">▶ Play</button>
+      <button class="tab-btn" onclick="showPage('levels')">☰ Levels</button>
+      <button class="tab-btn hidden" id="editor-tab-btn" onclick="showPage('editor')">✏ Editor</button>
+      <button class="tab-btn logout" onclick="doLogout()">⏻ Logout</button>
+    </div>
+  </div>
+
+  <div class="main">
+
+    <!-- ══════════ PLAY PAGE ══════════ -->
+    <div class="page active" id="page-play">
+
+      <!-- Progress + Stats -->
+      <div class="progress-wrap" id="prog-bar"></div>
+      <div class="stats-bar">
+        <div class="stat-box"><div class="lbl">Score</div><div class="val" id="ui-score">0</div></div>
+        <div class="stat-box"><div class="lbl">Cash</div><div class="val" id="ui-cash">$500</div></div>
+        <div class="stat-box"><div class="lbl">Level</div><div class="val" id="ui-level">—</div></div>
+        <div class="stat-box"><div class="lbl">Streak</div><div class="val" id="ui-streak">0 🔥</div></div>
+      </div>
+
+      <!-- STAGE: Intro -->
+      <div class="card" id="stage-intro">
+        <h2 id="intro-title"></h2>
+        <div class="npc" id="intro-npc1"></div>
+        <div class="npc" id="intro-npc2"></div>
+        <p id="intro-desc" style="color:var(--gray-500);font-size:13px"></p>
+        <div class="btn-row">
+          <button class="btn primary" onclick="startLevel()">Start ▶</button>
+        </div>
+      </div>
+
+      <!-- STAGE: Transactions -->
+      <div class="card hidden" id="stage-txn">
+        <h2>Record the transaction</h2>
+        <div id="txn-story" class="npc"></div>
+        <div class="txn-entry">
+          <div class="field" style="flex:1;min-width:140px">
+            <label>Debit (Dr)</label>
+            <select id="sel-dr"></select>
+          </div>
+          <div class="field" style="flex:1;min-width:140px">
+            <label>Credit (Cr)</label>
+            <select id="sel-cr"></select>
+          </div>
+          <div class="field" style="width:90px">
+            <label>Amount $</label>
+            <input type="number" id="txn-amt" min="1">
+          </div>
+        </div>
+        <p id="txn-hint" style="font-size:12px;color:var(--gray-400);margin-bottom:6px"></p>
+        <div id="txn-fb"></div>
+        <div class="btn-row">
+          <button class="btn primary" onclick="checkTxn()">✓ Submit</button>
+          <button class="btn" onclick="skipTxn()">Skip →</button>
+        </div>
+        <p id="txn-prog" class="text-muted" style="margin-top:8px"></p>
+      </div>
+
+      <!-- STAGE: Decisions -->
+      <div class="card hidden" id="stage-dec">
+        <h2>Make a decision</h2>
+        <div id="dec-npc" class="npc"></div>
+        <div id="dec-choices"></div>
+        <div id="dec-fb"></div>
+        <button class="btn primary hidden" id="dec-next-btn" onclick="nextDec()">Next →</button>
+        <p id="dec-prog" class="text-muted" style="margin-top:8px"></p>
+      </div>
+
+      <!-- STAGE: Financial Statements -->
+      <div class="card hidden" id="stage-fs">
+        <h2>Classify the items</h2>
+        <div class="npc">
+          <div class="avatar av-mr">MR</div>
+          <div class="bubble">Place each item into the correct section of the financial statements.</div>
+        </div>
+        <div id="fs-items-list"></div>
+        <div id="fs-fb"></div>
+        <div class="btn-row">
+          <button class="btn primary" onclick="checkFS()">✓ Submit statements</button>
+        </div>
+      </div>
+
+      <!-- STAGE: Results -->
+      <div class="card hidden text-center" id="stage-result">
+        <h2 style="margin-bottom:1rem">Level complete!</h2>
+        <div class="score-circle"><div class="num" id="res-score">0</div><div class="lbl">points</div></div>
+        <p id="res-grade" style="font-size:15px;font-weight:500;margin-bottom:1rem"></p>
+        <div class="stats-bar" id="res-stats" style="max-width:400px;margin:0 auto 1.5rem"></div>
+        <div class="btn-row" style="justify-content:center">
+          <button class="btn primary" id="btn-next-level" onclick="nextLevel()">Next level →</button>
+          <button class="btn" onclick="restartLevel()">↺ Retry</button>
+          <button class="btn" onclick="goToLevels()">☰ All levels</button>
+        </div>
+        <div id="res-statements" class="card" style="text-align:left;margin-top:1.5rem"></div>
+      </div>
+
+      <!-- No levels yet -->
+      <div class="card hidden text-center" id="stage-empty">
+        <p style="margin:2rem 0;color:var(--gray-400)">No levels found. Go to the Editor to create your first level!</p>
+        <button class="btn primary" onclick="showPage('editor')">✏ Open Editor</button>
+      </div>
+
+    </div><!-- /page-play -->
+
+    <!-- ══════════ LEVELS PAGE ══════════ -->
+    <div class="page" id="page-levels">
+      <div class="card">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem">
+          <h2 style="margin:0">All levels</h2>
+          <button class="btn primary hidden" id="new-level-btn" onclick="showPage('editor');newLevel()">+ New level</button>
+        </div>
+        <div id="levels-list"></div>
+      </div>
+    </div>
+
+    <!-- ══════════ EDITOR PAGE ══════════ -->
+    <div class="page" id="page-editor">
+      <div class="card">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem">
+          <h2 style="margin:0" id="editor-heading">New level</h2>
+          <div style="display:flex;gap:6px">
+            <button class="btn" onclick="showPage('levels')">Cancel</button>
+            <button class="btn success" onclick="saveLevel()">✓ Save level</button>
+          </div>
+        </div>
+
+        <!-- Basic info -->
+        <div class="field-row cols2">
+          <div class="field"><label>Level title</label><input type="text" id="ed-title" placeholder="e.g. Month 1 – Opening week"></div>
+          <div class="field"><label>Starting cash ($)</label><input type="number" id="ed-cash" value="500" min="0"></div>
+        </div>
+        <div class="field"><label>Intro – Mentor says (Ms. Rivera)</label><textarea id="ed-intro-mr" placeholder="Welcome message from Ms. Rivera..."></textarea></div>
+        <div class="field"><label>Intro – Partner says (Sam)</label><textarea id="ed-intro-sp" placeholder="Context from Sam..."></textarea></div>
+        <hr class="divider">
+
+        <!-- Transactions -->
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+          <h3 style="margin:0">Transactions <span class="tag" id="txn-count-tag">0</span></h3>
+          <button class="btn sm" onclick="addTxnEditor()">+ Add transaction</button>
+        </div>
+        <div id="txn-editor-list"></div>
+        <hr class="divider">
+
+        <!-- Decisions -->
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+          <h3 style="margin:0">Decisions <span class="tag" id="dec-count-tag">0</span></h3>
+          <button class="btn sm" onclick="addDecEditor()">+ Add decision</button>
+        </div>
+        <div id="dec-editor-list"></div>
+        <hr class="divider">
+
+        <!-- Financial Statement Items -->
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+          <h3 style="margin:0">Financial statement items <span class="tag" id="fs-count-tag">0</span></h3>
+          <button class="btn sm" onclick="addFsEditor()">+ Add item</button>
+        </div>
+        <div id="fs-editor-list"></div>
+        <hr class="divider">
+        <div style="display:flex;justify-content:flex-end;gap:6px">
+          <button class="btn" onclick="showPage('levels')">Cancel</button>
+          <button class="btn success" onclick="saveLevel()">✓ Save level</button>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /main -->
+</div><!-- /app -->
+
+<!-- ══════════ FIREBASE + AUTH + GAME SCRIPT ══════════ -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import {
+  getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword,
+  GoogleAuthProvider, signInWithPopup, sendPasswordResetEmail, signOut, onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+import {
+  getFirestore, doc, setDoc, getDoc, getDocs, collection, query, where
+} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+// ─── Firebase Config ──────────────────────────────────────────────────────────
+const firebaseConfig = {
+  apiKey: "AIzaSyAL5z9HORg9GNd6-o7te7i45nxxp5PbwQQ",
+  authDomain: "my-login-project-7b4bd.firebaseapp.com",
+  projectId: "my-login-project-7b4bd",
+  storageBucket: "my-login-project-7b4bd.firebasestorage.app",
+  messagingSenderId: "206845799853",
+  appId: "1:206845799853:web:1647f5e75d0351e80ec524"
+};
+
+// ─── ADMIN CONFIG ─────────────────────────────────────────────────────────────
+// Set this to YOUR Firebase user UID to grant editor access.
+// Find your UID in Firebase Console → Authentication → Users → copy the UID column.
+const ADMIN_UID = "49XqsAl4Y0OW9aUDfFrffwKbTge2";
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+const provider = new GoogleAuthProvider();
+
+let currentUser = null; // Firebase user object
+
+// ─── Auth UI helpers ──────────────────────────────────────────────────────────
+const authStatus = document.getElementById('auth-status');
+function setAuthStatus(msg, isError = true) {
+  authStatus.textContent = msg;
+  authStatus.style.color = isError ? 'var(--red)' : 'var(--green)';
+}
+function clearAuthStatus() { authStatus.textContent = ''; }
+
+function setLoading(btnId, text) {
+  const b = document.getElementById(btnId);
+  b.innerHTML = `<span class="spinner"></span>${text}`;
+  b.disabled = true;
+}
+function resetBtn(btnId, text) {
+  const b = document.getElementById(btnId);
+  b.innerHTML = text;
+  b.disabled = false;
+}
+
+window.togglePw = (id) => {
+  const inp = document.getElementById(id);
+  inp.type = inp.type === 'password' ? 'text' : 'password';
+};
+window.showSignup = () => {
+  document.getElementById('loginView').style.display = 'none';
+  document.getElementById('signupView').style.display = 'block';
+  clearAuthStatus();
+};
+window.showLogin = () => {
+  document.getElementById('signupView').style.display = 'none';
+  document.getElementById('loginView').style.display = 'block';
+  clearAuthStatus();
+};
+
+// ─── On login success ─────────────────────────────────────────────────────────
+async function onLoginSuccess(firebaseUser) {
+  currentUser = firebaseUser;
+  document.getElementById('login-overlay').classList.add('hidden');
+
+  // Show username in topbar
+  const userDoc = await getDoc(doc(db, 'users', firebaseUser.uid));
+  const displayName = userDoc.exists()
+    ? (userDoc.data().fullName || userDoc.data().userId || firebaseUser.email)
+    : (firebaseUser.displayName || firebaseUser.email);
+  document.getElementById('topbar-user').textContent = displayName;
+
+  // Show editor tab only for admin
+  if (firebaseUser.uid === ADMIN_UID) {
+    document.getElementById('editor-tab-btn').classList.remove('hidden');
+    document.getElementById('new-level-btn').classList.remove('hidden');
+  }
+
+  // Load shared levels + this user's saved progress
+  await loadGameData();
+  renderPlayPage();
+}
+
+// ─── Forgot password ──────────────────────────────────────────────────────────
+window.forgotPass = async () => {
+  const email = prompt('Enter your email to receive a reset link:');
+  if (!email) return;
+  try {
+    await sendPasswordResetEmail(auth, email);
+    alert('Password reset email sent! Check your inbox.');
+  } catch (e) { alert('Error: ' + e.message); }
+};
+
+// ─── Register ─────────────────────────────────────────────────────────────────
+document.getElementById('btnRegister').onclick = async () => {
+  const name    = document.getElementById('regName').value.trim();
+  const email   = document.getElementById('regEmail').value.trim();
+  const phone   = document.getElementById('regPhone').value.trim();
+  const userId  = document.getElementById('regUser').value.trim();
+  const pass    = document.getElementById('regPass').value;
+  const confirm = document.getElementById('regConfirm').value;
+
+  if (!name || !email || !userId || !pass) { setAuthStatus('Please fill in all fields.'); return; }
+  if (pass !== confirm) { setAuthStatus('Passwords do not match.'); return; }
+
+  setLoading('btnRegister', 'Creating account…');
+  try {
+    const result = await createUserWithEmailAndPassword(auth, email, pass);
+    await setDoc(doc(db, 'users', result.user.uid), {
+      fullName: name, email, phone, userId, createdAt: new Date().toISOString()
+    });
+    alert('Account created! Welcome to BizBooks. Please sign in.');
+    resetBtn('btnRegister', 'Create Account');
+    showLogin();
+  } catch (e) {
+    setAuthStatus(e.message);
+    resetBtn('btnRegister', 'Create Account');
+  }
+};
+
+// ─── Login with User ID ───────────────────────────────────────────────────────
+document.getElementById('btnLogin').onclick = async () => {
+  const userId = document.getElementById('loginUser').value.trim();
+  const pass   = document.getElementById('loginPass').value;
+  if (!userId || !pass) { setAuthStatus('Please enter your User ID and password.'); return; }
+
+  setLoading('btnLogin', 'Signing in…');
+  try {
+    const q = query(collection(db, 'users'), where('userId', '==', userId));
+    const snap = await getDocs(q);
+    if (snap.empty) throw new Error('User ID not found. Please check and try again.');
+    let email = '';
+    snap.forEach(d => email = d.data().email);
+    await signInWithEmailAndPassword(auth, email, pass);
+    // onAuthStateChanged handles the rest
+  } catch (e) {
+    setAuthStatus(e.message);
+    resetBtn('btnLogin', 'Sign In →');
+  }
+};
+
+// ─── Google Login ─────────────────────────────────────────────────────────────
+document.getElementById('btnGoogle').onclick = async () => {
+  try {
+    const result = await signInWithPopup(auth, provider);
+    // If new Google user, create a profile doc
+    const ref = doc(db, 'users', result.user.uid);
+    const snap = await getDoc(ref);
+    if (!snap.exists()) {
+      await setDoc(ref, {
+        fullName: result.user.displayName || '',
+        email: result.user.email,
+        phone: '',
+        userId: result.user.email.split('@')[0],
+        createdAt: new Date().toISOString()
+      });
+    }
+    // onAuthStateChanged handles the rest
+  } catch (e) { setAuthStatus(e.message); }
+};
+
+// ─── Logout ───────────────────────────────────────────────────────────────────
+window.doLogout = async () => {
+  await signOut(auth);
+  currentUser = null;
+  document.getElementById('login-overlay').classList.remove('hidden');
+  document.getElementById('editor-tab-btn').classList.add('hidden');
+  document.getElementById('new-level-btn').classList.add('hidden');
+  document.getElementById('topbar-user').textContent = '';
+  document.getElementById('loginUser').value = '';
+  document.getElementById('loginPass').value = '';
+  clearAuthStatus();
+  showLogin();
+};
+
+// ─── Auth state listener ──────────────────────────────────────────────────────
+onAuthStateChanged(auth, user => {
+  if (user) {
+    onLoginSuccess(user);
+  }
+  // If no user, overlay stays visible (default state)
+});
+
+// ══════════════════════════════════════════════════════════════════════════════
+// ─── GAME DATA ────────────────────────────────────────────────────────────────
+// ══════════════════════════════════════════════════════════════════════════════
+
+const ACCOUNTS = ['Cash','Accounts Receivable','Inventory','Equipment','Prepaid Expenses',
+  'Accounts Payable','Loan Payable','Revenue','Sales Revenue','Service Revenue',
+  'Cost of Goods Sold','Salaries Expense','Rent Expense','Supplies Expense',
+  'Utilities Expense','Depreciation Expense','Interest Expense','Retained Earnings',
+  'Owner\'s Equity','Bank'];
+
+const FS_SECTIONS = [
+  {id:'bs-asset',     label:'Balance sheet – Assets'},
+  {id:'bs-liability', label:'Balance sheet – Liabilities'},
+  {id:'bs-equity',    label:'Balance sheet – Equity'},
+  {id:'is-revenue',   label:'Income statement – Revenue'},
+  {id:'is-expense',   label:'Income statement – Expenses'},
+];
+
+const DEFAULT_LEVELS = [
+  {
+    id: 'lvl1',
+    title: 'Month 1 – Opening week',
+    cash: 500,
+    introMR: "Hi! I'm Ms. Rivera, your business mentor. You've just opened Spark Café — a student-run coffee shop. I'll guide you through keeping the books. Ready?",
+    introSP: "Hey, I'm Sam, your partner! We started with $500 cash, $200 in coffee supplies, and a $300 loan from the school fund. Let's do this!",
+    transactions: [
+      {story:'You sell $80 of coffee — customers pay cash.',dr:'Cash',cr:'Revenue',amount:80,hint:'Selling for cash: Cash (asset) increases on the Dr side; Revenue increases on the Cr side.'},
+      {story:'You buy $50 of coffee beans on credit from a supplier.',dr:'Inventory',cr:'Accounts Payable',amount:50,hint:'Buying on credit: Inventory increases (Dr); you owe money so Accounts Payable increases (Cr).'},
+      {story:'You pay $30 cash to the school for monthly stall rent.',dr:'Rent Expense',cr:'Cash',amount:30,hint:'Paying an expense: Expense increases (Dr); Cash decreases (Cr).'},
+      {story:'A customer buys $40 of coffee but will pay next week.',dr:'Accounts Receivable',cr:'Revenue',amount:40,hint:'Credit sale: Accounts Receivable increases (Dr); Revenue increases (Cr).'},
+      {story:'You pay off the $50 owed to the coffee bean supplier.',dr:'Accounts Payable',cr:'Cash',amount:50,hint:'Paying a creditor: Accounts Payable decreases (Dr); Cash decreases (Cr).'},
+    ],
+    decisions: [
+      {scene:"A popular smoothie trend is emerging. Sam says: 'Let's buy a $200 blender now!' But your cash is low.",options:[
+        {text:'Buy the blender now — jump on the trend!',good:false,result:'You spent $200 cash. Your cash balance dropped to a risky level. Cash flow matters! –10 pts',pts:-10},
+        {text:'Wait one more week and save up first.',good:true,result:'Smart! You saved before expanding. Good cash management. +20 pts',pts:20},
+        {text:'Borrow $200 from the school fund.',good:false,result:'More debt increases liabilities and costs. It hurt your profit margin. –5 pts',pts:-5},
+      ]},
+      {scene:"You made $120 profit this month. How should you use it?",options:[
+        {text:'Withdraw it all as personal income.',good:false,result:'Taking all profits out leaves no buffer for slow weeks. Businesses need retained earnings. –5 pts',pts:-5},
+        {text:'Keep $80 in the business, take $40 out.',good:true,result:'Excellent! Retaining some earnings strengthens your balance sheet. +20 pts',pts:20},
+        {text:'Spend it all on advertising flyers.',good:false,result:'Spending all profits on one thing without a plan is risky — you need a budget! –10 pts',pts:-10},
+      ]},
+    ],
+    fsItems: [
+      {label:'Cash',value:'$470',section:'bs-asset'},
+      {label:'Accounts Receivable',value:'$40',section:'bs-asset'},
+      {label:'Inventory',value:'$150',section:'bs-asset'},
+      {label:'Loan Payable',value:'$300',section:'bs-liability'},
+      {label:'Coffee Sales Revenue',value:'$120',section:'is-revenue'},
+      {label:'Cost of Goods Sold',value:'$50',section:'is-expense'},
+      {label:'Rent Expense',value:'$30',section:'is-expense'},
+    ],
+  }
+];
+
+// ─── State ────────────────────────────────────────────────────────────────────
+let levels = [];
+let editIdx = null;
+let G = {};
+
+// ─── Firestore helpers ────────────────────────────────────────────────────────
+// Levels are stored in a SHARED doc (admin edits, all users read)
+async function loadGameData() {
+  // Load shared levels
+  const lvSnap = await getDoc(doc(db, 'gameData', 'levels'));
+  levels = lvSnap.exists() ? lvSnap.data().list : DEFAULT_LEVELS;
+
+  // Load this user's progress
+  const pgSnap = await getDoc(doc(db, 'progress', currentUser.uid));
+  G = pgSnap.exists() ? pgSnap.data() : {};
+}
+
+async function saveLevels() {
+  // Only admin can call this; saves shared levels for everyone
+  await setDoc(doc(db, 'gameData', 'levels'), { list: levels });
+}
+
+async function saveProgress() {
+  if (!currentUser) return;
+  await setDoc(doc(db, 'progress', currentUser.uid), G);
+}
+
+// ─── Page routing ─────────────────────────────────────────────────────────────
+const el = id => document.getElementById(id);
+function hide(id) { el(id).classList.add('hidden'); }
+function show(id) { el(id).classList.remove('hidden'); }
+function showOne(id) {
+  ['stage-intro','stage-txn','stage-dec','stage-fs','stage-result','stage-empty'].forEach(hide);
+  show(id);
+}
+
+function showPage(p) {
+  document.querySelectorAll('.page').forEach(e => e.classList.remove('active'));
+  el('page-'+p).classList.add('active');
+  document.querySelectorAll('.tab-btn:not(.logout)').forEach(b => b.classList.remove('active'));
+  const tabMap = {'play':0,'levels':1,'editor':2};
+  const tabBtns = document.querySelectorAll('.tab-btn:not(.logout)');
+  if (tabMap[p] !== undefined) tabBtns[tabMap[p]].classList.add('active');
+  if (p === 'levels') renderLevelsList();
+  if (p === 'play') renderPlayPage();
+}
+// Expose globally for onclick attributes
+window.showPage = showPage;
+
+function updateStats() {
+  el('ui-score').textContent = G.score;
+  el('ui-cash').textContent = '$' + G.cash;
+  el('ui-level').textContent = (G.levelIdx+1) + '/' + levels.length;
+  el('ui-streak').textContent = G.streak + ' 🔥';
+}
+
+// ─── Play page ────────────────────────────────────────────────────────────────
+function renderPlayPage() {
+  if (!levels.length) { showOne('stage-empty'); return; }
+  if (G.levelIdx === undefined || G.levelIdx === null) startGameAt(0);
+  else showIntro();
+}
+
+function startGameAt(idx) {
+  G = { levelIdx: idx, score: 0, cash: levels[idx].cash, streak: 0,
+        txnIdx: 0, decIdx: 0, phase: 'intro', correctTxn: 0, correctDec: 0, fsCorrect: 0 };
+  saveProgress();
+  updateStats();
+  buildProgressBar();
+  showIntro();
+}
+
+function buildProgressBar() {
+  const lv = levels[G.levelIdx];
+  const phases = 2 + (lv.transactions.length?1:0) + (lv.decisions.length?1:0) + (lv.fsItems.length?1:0);
+  let html = '';
+  for (let i = 0; i < phases; i++) html += `<div class="progress-seg" id="prog-${i}"></div>`;
+  el('prog-bar').innerHTML = html;
+  setProgress(0);
+}
+
+function setProgress(step) {
+  document.querySelectorAll('.progress-seg').forEach((s,i) => {
+    s.className = 'progress-seg' + (i < step ? ' done' : i === step ? ' active' : '');
+  });
+}
+
+function showIntro() {
+  const lv = levels[G.levelIdx];
+  el('intro-title').textContent = lv.title;
+  el('intro-npc1').innerHTML = `<div class="avatar av-mr">MR</div><div class="bubble">${lv.introMR}</div>`;
+  el('intro-npc2').innerHTML = `<div class="avatar av-sp">SP</div><div class="bubble">${lv.introSP}</div>`;
+  setProgress(0);
+  showOne('stage-intro');
+}
+
+function startLevel() {
+  const lv = levels[G.levelIdx];
+  if (lv.transactions.length) { G.phase='txn'; showTxn(); }
+  else if (lv.decisions.length) { G.phase='dec'; showDec(); }
+  else if (lv.fsItems.length) { G.phase='fs'; showFS(); }
+  else showResult();
+}
+window.startLevel = startLevel;
+
+// ── Transactions ──
+function accountOptions() {
+  return ACCOUNTS.map(a => `<option value="${a}">${a}</option>`).join('');
+}
+
+function showTxn() {
+  const lv = levels[G.levelIdx];
+  if (G.txnIdx >= lv.transactions.length) {
+    if (lv.decisions.length) { G.phase='dec'; showDec(); }
+    else if (lv.fsItems.length) { G.phase='fs'; showFS(); }
+    else showResult();
+    return;
+  }
+  const t = lv.transactions[G.txnIdx];
+  const opts = accountOptions();
+  el('txn-story').innerHTML = `<div class="avatar av-sp">SP</div><div class="bubble">${t.story}</div>`;
+  el('sel-dr').innerHTML = opts; el('sel-cr').innerHTML = opts;
+  el('sel-dr').value = t.dr; el('sel-cr').value = t.cr;
+  el('txn-amt').value = t.amount;
+  el('txn-hint').textContent = '💡 Hint: ' + t.hint;
+  el('txn-fb').innerHTML = '';
+  el('txn-prog').textContent = `Transaction ${G.txnIdx+1} of ${lv.transactions.length}`;
+  setProgress(1);
+  showOne('stage-txn');
+}
+
+function checkTxn() {
+  const lv = levels[G.levelIdx];
+  const t = lv.transactions[G.txnIdx];
+  const dr = el('sel-dr').value, cr = el('sel-cr').value, amt = parseInt(el('txn-amt').value);
+  const ok = dr === t.dr && cr === t.cr && amt === t.amount;
+  if (ok) {
+    G.score += 20; G.streak++; G.correctTxn++; G.cash += t.amount;
+    el('txn-fb').innerHTML = `<div class="feedback fb-ok">✓ Correct! Dr <b>${dr}</b> / Cr <b>${cr}</b> for $${amt}. +20 pts</div>`;
+    updateStats(); saveProgress();
+    setTimeout(() => { G.txnIdx++; showTxn(); }, 1400);
+  } else {
+    G.streak = 0;
+    const msgs = [];
+    if (dr !== t.dr) msgs.push(`Debit should be <b>${t.dr}</b>`);
+    if (cr !== t.cr) msgs.push(`Credit should be <b>${t.cr}</b>`);
+    if (amt !== t.amount) msgs.push(`Amount should be $${t.amount}`);
+    el('txn-fb').innerHTML = `<div class="feedback fb-err">✗ Not quite. ${msgs.join('. ')}.</div>`;
+    updateStats(); saveProgress();
+  }
+}
+window.checkTxn = checkTxn;
+
+function skipTxn() { G.txnIdx++; showTxn(); }
+window.skipTxn = skipTxn;
+
+// ── Decisions ──
+function showDec() {
+  const lv = levels[G.levelIdx];
+  if (G.decIdx >= lv.decisions.length) {
+    if (lv.fsItems.length) { G.phase='fs'; showFS(); } else showResult();
+    return;
+  }
+  const d = lv.decisions[G.decIdx];
+  el('dec-npc').innerHTML = `<div class="avatar av-mr">MR</div><div class="bubble">${d.scene}</div>`;
+  el('dec-choices').innerHTML = d.options.map((o,i) =>
+    `<button class="choice" onclick="pickDec(${i})">${o.text}</button>`
+  ).join('');
+  el('dec-fb').innerHTML = '';
+  el('dec-next-btn').classList.add('hidden');
+  el('dec-prog').textContent = `Decision ${G.decIdx+1} of ${lv.decisions.length}`;
+  setProgress(2);
+  showOne('stage-dec');
+}
+
+function pickDec(i) {
+  const lv = levels[G.levelIdx];
+  const o = lv.decisions[G.decIdx].options[i];
+  document.querySelectorAll('.choice').forEach((b, j) => {
+    b.disabled = true;
+    if (j === i) b.className = 'choice ' + (o.good ? 'good' : 'bad');
+  });
+  G.score = Math.max(0, G.score + o.pts);
+  if (o.good) { G.streak++; G.correctDec++; } else G.streak = 0;
+  el('dec-fb').innerHTML = `<div class="feedback ${o.good?'fb-ok':'fb-err'}">${o.result}</div>`;
+  el('dec-next-btn').classList.remove('hidden');
+  updateStats(); saveProgress();
+}
+window.pickDec = pickDec;
+
+function nextDec() { G.decIdx++; showDec(); }
+window.nextDec = nextDec;
+
+// ── Financial Statements ──
+function showFS() {
+  const lv = levels[G.levelIdx];
+  const secOpts = FS_SECTIONS.map(s => `<option value="${s.id}">${s.label}</option>`).join('');
+  el('fs-items-list').innerHTML = lv.fsItems.map((it, i) => `
+    <div class="fs-classify">
+      <span class="item-lbl">${it.label} <span style="color:var(--gray-400)">${it.value}</span></span>
+      <select id="fs-sel-${i}"><option value="">— classify —</option>${secOpts}</select>
+    </div>
+  `).join('');
+  el('fs-fb').innerHTML = '';
+  setProgress(3);
+  showOne('stage-fs');
+}
+
+function checkFS() {
+  const lv = levels[G.levelIdx];
+  let correct = 0;
+  lv.fsItems.forEach((it, i) => { if (el(`fs-sel-${i}`).value === it.section) correct++; });
+  G.fsCorrect = correct;
+  const pts = correct * 10;
+  G.score += pts;
+  if (correct === lv.fsItems.length) G.streak++;
+  el('fs-fb').innerHTML = `<div class="feedback ${correct>=Math.ceil(lv.fsItems.length/2)?'fb-ok':'fb-err'}">
+    You classified <b>${correct}/${lv.fsItems.length}</b> items correctly. +${pts} pts.</div>`;
+  updateStats(); saveProgress();
+  setTimeout(showResult, 1800);
+}
+window.checkFS = checkFS;
+
+// ── Result ──
+function showResult() {
+  const lv = levels[G.levelIdx];
+  const maxScore = lv.transactions.length*20 + lv.decisions.length*20 + lv.fsItems.length*10;
+  const pct = maxScore ? Math.round((G.score/maxScore)*100) : 100;
+  el('res-score').textContent = G.score;
+  el('res-grade').textContent = pct>=85 ? '🏆 Outstanding accountant!' : pct>=60 ? '🎉 Good work!' : '📚 Keep practising!';
+  el('res-stats').innerHTML = `
+    <div class="stat-box"><div class="lbl">Score</div><div class="val">${G.score}</div></div>
+    <div class="stat-box"><div class="lbl">Txns correct</div><div class="val">${G.correctTxn}/${lv.transactions.length}</div></div>
+    <div class="stat-box"><div class="lbl">Decisions</div><div class="val">${G.correctDec}/${lv.decisions.length}</div></div>
+    <div class="stat-box"><div class="lbl">FS items</div><div class="val">${G.fsCorrect}/${lv.fsItems.length}</div></div>
+  `;
+  const hasNext = G.levelIdx + 1 < levels.length;
+  el('btn-next-level').style.display = hasNext ? '' : 'none';
+
+  let stmtHtml = `<h3>Financial summary — ${lv.title}</h3><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1rem;margin-top:1rem">`;
+  const rev = lv.fsItems.filter(i=>i.section==='is-revenue').reduce((a,it)=>a+(parseFloat(it.value.replace(/[$,]/g,''))||0),0);
+  const exp = lv.fsItems.filter(i=>i.section==='is-expense').reduce((a,it)=>a+(parseFloat(it.value.replace(/[$,]/g,''))||0),0);
+  const assets = lv.fsItems.filter(i=>i.section==='bs-asset');
+  const liabs  = lv.fsItems.filter(i=>i.section==='bs-liability');
+  stmtHtml += `<div>
+    <div class="fs-section-title">Income statement</div>
+    ${lv.fsItems.filter(i=>i.section==='is-revenue').map(it=>`<div class="fs-row"><span>${it.label}</span><span>${it.value}</span></div>`).join('')}
+    ${lv.fsItems.filter(i=>i.section==='is-expense').map(it=>`<div class="fs-row"><span>${it.label}</span><span>${it.value}</span></div>`).join('')}
+    <div class="fs-total"><span>Net profit</span><span>$${rev-exp}</span></div>
+  </div>`;
+  stmtHtml += `<div>
+    <div class="fs-section-title">Balance sheet</div>
+    ${assets.map(it=>`<div class="fs-row"><span>${it.label}</span><span>${it.value}</span></div>`).join('')}
+    <div class="fs-total"><span>Total assets</span><span>$${assets.reduce((a,it)=>a+(parseFloat(it.value.replace(/[$,]/g,''))||0),0)}</span></div>
+    ${liabs.map(it=>`<div class="fs-row"><span>${it.label}</span><span>${it.value}</span></div>`).join('')}
+  </div>`;
+  stmtHtml += '</div>';
+  el('res-statements').innerHTML = stmtHtml;
+  setProgress(4);
+  showOne('stage-result');
+}
+
+function nextLevel() { startGameAt(G.levelIdx + 1); }
+function restartLevel() { startGameAt(G.levelIdx); }
+function goToLevels() { showPage('levels'); }
+window.nextLevel = nextLevel; window.restartLevel = restartLevel; window.goToLevels = goToLevels;
+
+// ─── Levels List ──────────────────────────────────────────────────────────────
+function renderLevelsList() {
+  const isAdmin = currentUser && currentUser.uid === ADMIN_UID;
+  if (!levels.length) {
+    el('levels-list').innerHTML = '<p class="text-muted" style="padding:1rem 0">No levels yet.</p>';
+    return;
+  }
+  el('levels-list').innerHTML = levels.map((lv, i) => `
+    <div class="level-item">
+      <div class="level-num">${i+1}</div>
+      <div class="level-info">
+        <div class="name">${lv.title}</div>
+        <div class="meta">${lv.transactions.length} transactions · ${lv.decisions.length} decisions · ${lv.fsItems.length} FS items</div>
+      </div>
+      <div class="level-actions">
+        <button class="btn sm primary" onclick="playLevel(${i})">▶ Play</button>
+        ${isAdmin ? `<button class="btn sm" onclick="editLevel(${i})">✏ Edit</button>
+        <button class="btn sm danger" onclick="deleteLevel(${i})">✕</button>` : ''}
+      </div>
+    </div>
+  `).join('');
+}
+
+function playLevel(i) { startGameAt(i); showPage('play'); }
+async function deleteLevel(i) {
+  if (!confirm(`Delete "${levels[i].title}"?`)) return;
+  levels.splice(i, 1);
+  await saveLevels();
+  renderLevelsList();
+}
+window.playLevel = playLevel; window.deleteLevel = deleteLevel;
+
+// ─── Editor ───────────────────────────────────────────────────────────────────
+let edTxns = [], edDecs = [], edFsItems = [];
+
+function newLevel() {
+  editIdx = null; edTxns = []; edDecs = []; edFsItems = [];
+  el('editor-heading').textContent = 'New level';
+  el('ed-title').value = ''; el('ed-cash').value = 500;
+  el('ed-intro-mr').value = ''; el('ed-intro-sp').value = '';
+  el('txn-editor-list').innerHTML = ''; el('dec-editor-list').innerHTML = ''; el('fs-editor-list').innerHTML = '';
+  updateEditorCounts();
+}
+window.newLevel = newLevel;
+
+function editLevel(i) {
+  editIdx = i;
+  const lv = levels[i];
+  edTxns = JSON.parse(JSON.stringify(lv.transactions));
+  edDecs = JSON.parse(JSON.stringify(lv.decisions));
+  edFsItems = JSON.parse(JSON.stringify(lv.fsItems));
+  el('editor-heading').textContent = 'Edit: ' + lv.title;
+  el('ed-title').value = lv.title; el('ed-cash').value = lv.cash;
+  el('ed-intro-mr').value = lv.introMR; el('ed-intro-sp').value = lv.introSP;
+  renderTxnEditor(); renderDecEditor(); renderFsEditor(); updateEditorCounts();
+  showPage('editor');
+}
+window.editLevel = editLevel;
+
+function updateEditorCounts() {
+  el('txn-count-tag').textContent = edTxns.length;
+  el('dec-count-tag').textContent = edDecs.length;
+  el('fs-count-tag').textContent = edFsItems.length;
+}
+
+// ── Txn editor ──
+function addTxnEditor() { edTxns.push({story:'',dr:'Cash',cr:'Revenue',amount:0,hint:''}); renderTxnEditor(); updateEditorCounts(); }
+window.addTxnEditor = addTxnEditor;
+
+function renderTxnEditor() {
+  const opts = ACCOUNTS.map(a=>`<option value="${a}">${a}</option>`).join('');
+  el('txn-editor-list').innerHTML = edTxns.map((t,i) => `
+    <div class="sub-item">
+      <button class="btn sm danger remove-btn" onclick="removeTxn(${i})">✕</button>
+      <div class="field"><label>Transaction story</label><textarea oninput="edTxns[${i}].story=this.value" rows="2">${t.story}</textarea></div>
+      <div class="field-row cols3">
+        <div class="field"><label>Debit account</label><select onchange="edTxns[${i}].dr=this.value">${opts.replace(`value="${t.dr}"`,`value="${t.dr}" selected`)}</select></div>
+        <div class="field"><label>Credit account</label><select onchange="edTxns[${i}].cr=this.value">${opts.replace(`value="${t.cr}"`,`value="${t.cr}" selected`)}</select></div>
+        <div class="field"><label>Amount ($)</label><input type="number" value="${t.amount}" oninput="edTxns[${i}].amount=parseInt(this.value)||0"></div>
+      </div>
+      <div class="field"><label>Hint for students</label><input type="text" value="${t.hint}" oninput="edTxns[${i}].hint=this.value"></div>
+    </div>
+  `).join('');
+}
+
+function removeTxn(i) { edTxns.splice(i,1); renderTxnEditor(); updateEditorCounts(); }
+window.removeTxn = removeTxn;
+
+// ── Decision editor ──
+function addDecEditor() {
+  edDecs.push({scene:'',options:[
+    {text:'',good:false,result:'',pts:-10},
+    {text:'',good:true,result:'',pts:20},
+    {text:'',good:false,result:'',pts:-5},
+  ]});
+  renderDecEditor(); updateEditorCounts();
+}
+window.addDecEditor = addDecEditor;
+
+function renderDecEditor() {
+  el('dec-editor-list').innerHTML = edDecs.map((d,di) => `
+    <div class="sub-item">
+      <button class="btn sm danger remove-btn" onclick="removeDec(${di})">✕</button>
+      <div class="field"><label>Scenario description</label><textarea oninput="edDecs[${di}].scene=this.value" rows="2">${d.scene}</textarea></div>
+      ${d.options.map((o,oi) => `
+        <div style="background:var(--gray-100);border-radius:8px;padding:10px;margin-bottom:6px">
+          <div style="font-size:11px;font-weight:600;color:var(--gray-400);margin-bottom:6px">Option ${oi+1} ${o.good?'✓ (correct)':''}</div>
+          <div class="field-row cols2">
+            <div class="field"><label>Option text</label><input type="text" value="${o.text}" oninput="edDecs[${di}].options[${oi}].text=this.value"></div>
+            <div class="field"><label>Points</label><input type="number" value="${o.pts}" oninput="edDecs[${di}].options[${oi}].pts=parseInt(this.value)||0"></div>
+          </div>
+          <div class="field-row cols2">
+            <div class="field"><label>Result explanation</label><input type="text" value="${o.result}" oninput="edDecs[${di}].options[${oi}].result=this.value"></div>
+            <div class="field"><label>Mark as correct?</label>
+              <select onchange="edDecs[${di}].options[${oi}].good=this.value==='true'">
+                <option value="false" ${!o.good?'selected':''}>No – wrong choice</option>
+                <option value="true" ${o.good?'selected':''}>Yes – correct choice</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      `).join('')}
+      <button class="btn sm" onclick="addDecOption(${di})">+ Add option</button>
+    </div>
+  `).join('');
+}
+
+function removeDec(i) { edDecs.splice(i,1); renderDecEditor(); updateEditorCounts(); }
+function addDecOption(di) { edDecs[di].options.push({text:'',good:false,result:'',pts:-5}); renderDecEditor(); }
+window.removeDec = removeDec; window.addDecOption = addDecOption;
+
+// ── FS editor ──
+function addFsEditor() { edFsItems.push({label:'',value:'$0',section:'bs-asset'}); renderFsEditor(); updateEditorCounts(); }
+window.addFsEditor = addFsEditor;
+
+function renderFsEditor() {
+  const secOpts = FS_SECTIONS.map(s=>`<option value="${s.id}">${s.label}</option>`).join('');
+  el('fs-editor-list').innerHTML = edFsItems.map((it,i) => `
+    <div class="sub-item">
+      <button class="btn sm danger remove-btn" onclick="removeFsItem(${i})">✕</button>
+      <div class="field-row cols3">
+        <div class="field"><label>Item name</label><input type="text" value="${it.label}" oninput="edFsItems[${i}].label=this.value" placeholder="e.g. Cash"></div>
+        <div class="field"><label>Amount (display)</label><input type="text" value="${it.value}" oninput="edFsItems[${i}].value=this.value" placeholder="e.g. $500"></div>
+        <div class="field"><label>Correct section</label>
+          <select onchange="edFsItems[${i}].section=this.value">
+            ${FS_SECTIONS.map(s=>`<option value="${s.id}" ${it.section===s.id?'selected':''}>${s.label}</option>`).join('')}
+          </select>
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function removeFsItem(i) { edFsItems.splice(i,1); renderFsEditor(); updateEditorCounts(); }
+window.removeFsItem = removeFsItem;
+
+// ── Save level ──
+async function saveLevel() {
+  const title = el('ed-title').value.trim();
+  if (!title) { alert('Please enter a level title.'); return; }
+  const lv = {
+    id: editIdx !== null ? levels[editIdx].id : 'lvl_'+Date.now(),
+    title, cash: parseInt(el('ed-cash').value)||500,
+    introMR: el('ed-intro-mr').value.trim(),
+    introSP: el('ed-intro-sp').value.trim(),
+    transactions: edTxns, decisions: edDecs, fsItems: edFsItems,
+  };
+  if (editIdx !== null) levels[editIdx] = lv; else levels.push(lv);
+  await saveLevels();
+  showPage('levels');
+}
+window.saveLevel = saveLevel;
+
+</script>
+</body>
+</html>
