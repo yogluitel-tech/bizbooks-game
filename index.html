@@ -684,6 +684,7 @@ document.getElementById('btnRegister').onclick = async () => {
     await setDoc(doc(db, 'users', result.user.uid), {
       fullName: name, email, phone, userId, createdAt: new Date().toISOString()
     });
+    await signOut(auth);
     alert('Account created! Welcome to BizBooks. Please sign in.');
     resetBtn('btnRegister', 'Create Account');
     showLogin();
