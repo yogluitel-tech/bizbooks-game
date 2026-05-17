@@ -703,8 +703,10 @@ document.getElementById('btnLogin').onclick = async () => {
   setLoading('btnLogin', 'Signing in…');
   try {
     const q = query(collection(db, 'users'), where('userId', '==', userId));
-    const snap = await getDocs(q);
-    if (snap.empty) throw new Error('User ID not found. Please check and try again.');
+const snap = await getDocs(q);
+console.log('Query result size:', snap.size);
+snap.forEach(d => console.log('Found doc:', d.id, JSON.stringify(d.data())));
+if (snap.empty) throw new Error('User ID not found. Please check and try again.');
     let email = '';
     snap.forEach(d => email = d.data().email);
     await signInWithEmailAndPassword(auth, email, pass);
