@@ -563,8 +563,8 @@ import {
   sendPasswordResetEmail, signOut, onAuthStateChanged
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 import {
-  getStorage, ref, uploadString, getDownloadURL, deleteObject
-} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
+  getFirestore, doc, setDoc, getDoc, getDocs, collection, query, where, updateDoc
+} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
 // ─── Firebase Config ──────────────────────────────────────────────────────────
 const firebaseConfig = {
