@@ -63,13 +63,6 @@
   }
   .auth-btn:hover { opacity: 0.9; }
   .auth-btn:disabled { opacity: 0.6; cursor: not-allowed; }
-  .auth-btn.google-btn {
-    background: white; color: #444; border: 1px solid var(--gray-200);
-    display: flex; align-items: center; justify-content: center; gap: 10px;
-    margin-top: 10px;
-  }
-  .auth-btn.google-btn img { width: 18px; }
-
   .auth-footer { margin-top: 20px; text-align: center; font-size: 13px; border-top: 1px solid var(--gray-100); padding-top: 16px; }
   .auth-link { color: var(--blue); cursor: pointer; font-weight: 600; }
 
@@ -570,9 +563,6 @@ import {
   sendPasswordResetEmail, signOut, onAuthStateChanged
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 import {
-  getFirestore, doc, setDoc, getDoc, getDocs, collection, query, where, updateDoc
-} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-import {
   getStorage, ref, uploadString, getDownloadURL, deleteObject
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
 
@@ -704,8 +694,6 @@ document.getElementById('btnLogin').onclick = async () => {
   try {
     const q = query(collection(db, 'users'), where('userId', '==', userId));
     const snap = await getDocs(q);
-    console.log('Query result size:', snap.size);
-    snap.forEach(d => console.log('Found doc:', d.id, JSON.stringify(d.data())));
     if (snap.empty) throw new Error('User ID not found. Please check and try again.');
     let email = '';
     snap.forEach(d => email = d.data().email);
@@ -838,7 +826,7 @@ function showPage(p) {
   document.querySelectorAll('.page').forEach(e => e.classList.remove('active'));
   el('page-'+p).classList.add('active');
   document.querySelectorAll('.tab-btn:not(.logout)').forEach(b => b.classList.remove('active'));
-  const tabMap = {'play':0,'levels':1,'editor':2};
+  const tabMap = {'play':0,'levels':1,'editor':2,'admin':3,'profile':4};
   const tabBtns = document.querySelectorAll('.tab-btn:not(.logout)');
   if (tabMap[p] !== undefined) tabBtns[tabMap[p]].classList.add('active');
   if (p === 'levels') renderLevelsList();
