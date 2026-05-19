@@ -261,11 +261,10 @@
 
 <!-- ══════════ LOGIN OVERLAY ══════════ -->
 <div id="login-overlay">
-  <div class="auth-card">
-    <div class="auth-logo">
-      <span class="logo-icon">📒</span>
-      <span class="logo-name">BizBooks</span>
-    </div>
+  <div class="auth-logo">
+  <img src="logo.png" alt="BizBooks Logo" style="height: 48px; width: auto; margin-bottom: 8px;">
+  <span class="logo-name">BizBooks</span>
+</div>
 
     <!-- Login View -->
     <div id="loginView">
@@ -315,12 +314,14 @@
 <div id="app">
 
   <div class="topbar">
-    <div class="topbar-brand"><span>📒</span> BizBooks</div>
-    <div class="topbar-right">
+  <div class="topbar-brand">
+    <img src="logo.png" alt="BizBooks" style="height: 28px; width: auto; margin-right: 4px;">
+    BizBooks
+  </div>
+  <div class="topbar-right">
       <span class="topbar-user" id="topbar-user"></span>
       <button class="tab-btn active" onclick="showPage('play')">▶ Play</button>
       <button class="tab-btn" onclick="showPage('levels')">☰ Levels</button>
-      <button class="tab-btn hidden" id="editor-tab-btn" onclick="showPage('editor')">✏ Editor</button>
       <button class="tab-btn hidden" id="admin-tab-btn" onclick="showPage('admin')">👥 Admin</button>
       <button class="tab-btn" onclick="showPage('profile')">👤 Profile</button>
       <button class="tab-btn logout" onclick="doLogout()">⏻ Logout</button>
@@ -420,7 +421,7 @@
       <!-- No levels yet -->
       <div class="card hidden text-center" id="stage-empty">
         <p style="margin:2rem 0;color:var(--gray-400)">No levels found. Go to the Editor to create your first level!</p>
-        <button class="btn primary" onclick="showPage('editor')">✏ Open Editor</button>
+        <button class="btn primary" onclick="showPage('admin')">✏ Open Editor</button>
       </div>
 
     </div><!-- /page-play -->
@@ -430,63 +431,11 @@
       <div class="card">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem">
           <h2 style="margin:0">All levels</h2>
-          <button class="btn primary hidden" id="new-level-btn" onclick="showPage('editor');newLevel()">+ New level</button>
+          <button class="btn primary hidden" id="new-level-btn" onclick="showPage('admin');newLevel()">+ New level</button>
         </div>
         <div id="levels-list"></div>
       </div>
     </div>
-
-    <!-- ══════════ EDITOR PAGE ══════════ -->
-    <div class="page" id="page-editor">
-      <div class="card">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem">
-          <h2 style="margin:0" id="editor-heading">New level</h2>
-          <div style="display:flex;gap:6px">
-            <button class="btn" onclick="showPage('levels')">Cancel</button>
-            <button class="btn success" onclick="saveLevel()">✓ Save level</button>
-          </div>
-        </div>
-
-        <!-- Basic info -->
-        <div class="field-row cols2">
-          <div class="field"><label>Level title</label><input type="text" id="ed-title" placeholder="e.g. Month 1 – Opening week"></div>
-          <div class="field"><label>Starting cash ($)</label><input type="number" id="ed-cash" value="500" min="0"></div>
-        </div>
-        <div class="field"><label>Intro – Mentor says (Ms. Rivera)</label><textarea id="ed-intro-mr" placeholder="Welcome message from Ms. Rivera..."></textarea></div>
-        <div class="field"><label>Intro – Partner says (Sam)</label><textarea id="ed-intro-sp" placeholder="Context from Sam..."></textarea></div>
-        <hr class="divider">
-
-        <!-- Transactions -->
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-          <h3 style="margin:0">Transactions <span class="tag" id="txn-count-tag">0</span></h3>
-          <button class="btn sm" onclick="addTxnEditor()">+ Add transaction</button>
-        </div>
-        <div id="txn-editor-list"></div>
-        <hr class="divider">
-
-        <!-- Decisions -->
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-          <h3 style="margin:0">Decisions <span class="tag" id="dec-count-tag">0</span></h3>
-          <button class="btn sm" onclick="addDecEditor()">+ Add decision</button>
-        </div>
-        <div id="dec-editor-list"></div>
-        <hr class="divider">
-
-        <!-- Financial Statement Items -->
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-          <h3 style="margin:0">Financial statement items <span class="tag" id="fs-count-tag">0</span></h3>
-          <button class="btn sm" onclick="addFsEditor()">+ Add item</button>
-        </div>
-        <div id="fs-editor-list"></div>
-        <hr class="divider">
-        <div style="display:flex;justify-content:flex-end;gap:6px">
-          <button class="btn" onclick="showPage('levels')">Cancel</button>
-          <button class="btn success" onclick="saveLevel()">✓ Save level</button>
-        </div>
-      </div>
-    </div>
-
-  </div><!-- /main -->
 
     <!-- ══════════ PROFILE PAGE ══════════ -->
     <div class="page" id="page-profile" style="max-width:780px;margin:0 auto;width:100%;padding:1.5rem">
@@ -546,10 +495,56 @@
 
     <!-- ══════════ ADMIN DASHBOARD ══════════ -->
     <div class="page" id="page-admin" style="max-width:780px;margin:0 auto;width:100%;padding:1.5rem">
-      <div class="card">
-        <h2 style="margin-bottom:1rem">👥 All Users</h2>
-        <div id="admin-users-list"><p class="text-muted">Loading users…</p></div>
-      </div>
+      <div class="card" id="admin-users-card">
+  <h2 style="margin-bottom:1rem">👥 All Users</h2>
+  <div id="admin-users-list"><p class="text-muted">Loading users…</p></div>
+</div>
+  <!-- ══════════ EDITOR PAGE ══════════ -->
+<div class="card hidden" id="admin-editor-card">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem">
+          <h2 style="margin:0" id="editor-heading">New level</h2>
+          <div style="display:flex;gap:6px">
+            <button class="btn" onclick="showPage('admin')">Cancel</button>
+            <button class="btn success" onclick="saveLevel()">✓ Save level</button>
+          </div>
+        </div>
+
+        <!-- Basic info -->
+        <div class="field-row cols2">
+          <div class="field"><label>Level title</label><input type="text" id="ed-title" placeholder="e.g. Month 1 – Opening week"></div>
+          <div class="field"><label>Starting cash ($)</label><input type="number" id="ed-cash" value="500" min="0"></div>
+        </div>
+        <div class="field"><label>Intro – Mentor says (Ms. Rivera)</label><textarea id="ed-intro-mr" placeholder="Welcome message from Ms. Rivera..."></textarea></div>
+        <div class="field"><label>Intro – Partner says (Sam)</label><textarea id="ed-intro-sp" placeholder="Context from Sam..."></textarea></div>
+        <hr class="divider">
+
+        <!-- Transactions -->
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+          <h3 style="margin:0">Transactions <span class="tag" id="txn-count-tag">0</span></h3>
+          <button class="btn sm" onclick="addTxnEditor()">+ Add transaction</button>
+        </div>
+        <div id="txn-editor-list"></div>
+        <hr class="divider">
+
+        <!-- Decisions -->
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+          <h3 style="margin:0">Decisions <span class="tag" id="dec-count-tag">0</span></h3>
+          <button class="btn sm" onclick="addDecEditor()">+ Add decision</button>
+        </div>
+        <div id="dec-editor-list"></div>
+        <hr class="divider">
+
+        <!-- Financial Statement Items -->
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+          <h3 style="margin:0">Financial statement items <span class="tag" id="fs-count-tag">0</span></h3>
+          <button class="btn sm" onclick="addFsEditor()">+ Add item</button>
+        </div>
+        <div id="fs-editor-list"></div>
+        <hr class="divider">
+        <div style="display:flex;justify-content:flex-end;gap:6px">
+          <button class="btn" onclick="showPage('admin')">Cancel</button>
+          <button class="btn success" onclick="saveLevel()">✓ Save level</button>
+        </div>
     </div><!-- /page-admin -->
 
 </div><!-- /app -->
@@ -633,16 +628,16 @@ async function onLoginSuccess(firebaseUser) {
     : (firebaseUser.displayName || firebaseUser.email);
   document.getElementById('topbar-user').textContent = displayName;
 
-  // Show editor + admin tabs only for admin
+  // Show admin tab only for admin
   if (firebaseUser.uid === ADMIN_UID) {
-    document.getElementById('editor-tab-btn').classList.remove('hidden');
     document.getElementById('new-level-btn').classList.remove('hidden');
     document.getElementById('admin-tab-btn').classList.remove('hidden');
   }
 
   // Load shared levels + this user's saved progress
   await loadGameData();
-  renderPlayPage();
+  const savedPage = localStorage.getItem('current_page') || 'play';
+  showPage(savedPage);
 }
 
 // ─── Forgot password ──────────────────────────────────────────────────────────
@@ -825,13 +820,18 @@ function showPage(p) {
   document.querySelectorAll('.page').forEach(e => e.classList.remove('active'));
   el('page-'+p).classList.add('active');
   document.querySelectorAll('.tab-btn:not(.logout)').forEach(b => b.classList.remove('active'));
-  const tabMap = {'play':0,'levels':1,'editor':2,'admin':3,'profile':4};
+  const tabMap = {'play':0,'levels':1,'admin':2,'profile':3};
   const tabBtns = document.querySelectorAll('.tab-btn:not(.logout)');
   if (tabMap[p] !== undefined) tabBtns[tabMap[p]].classList.add('active');
   if (p === 'levels') renderLevelsList();
   if (p === 'play') renderPlayPage();
   if (p === 'profile') renderProfilePage();
   if (p === 'admin') renderAdminDashboard();
+  if (p === 'admin') {
+    el('admin-users-card').classList.remove('hidden');
+    el('admin-editor-card').classList.add('hidden');
+}
+  localStorage.setItem('current_page', p);
 }
 // Expose globally for onclick attributes
 window.showPage = showPage;
@@ -1096,6 +1096,10 @@ function newLevel() {
   el('ed-intro-mr').value = ''; el('ed-intro-sp').value = '';
   el('txn-editor-list').innerHTML = ''; el('dec-editor-list').innerHTML = ''; el('fs-editor-list').innerHTML = '';
   updateEditorCounts();
+
+  // 🌟 PASTE THESE TWO LINES HERE:
+  el('admin-users-card').classList.add('hidden');
+  el('admin-editor-card').classList.remove('hidden');
 }
 window.newLevel = newLevel;
 
