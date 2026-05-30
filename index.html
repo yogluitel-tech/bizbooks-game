@@ -230,19 +230,6 @@
   .profile-field .val { font-weight: 500; }
   .progress-level-badge { display: inline-flex; align-items: center; gap: 6px; background: var(--blue-light); color: var(--blue-dark); padding: 4px 12px; border-radius: 20px; font-size: 13px; font-weight: 600; }
 
-  /* Shared photos */
-  .photo-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 1rem; }
-  .photo-thumb { position: relative; aspect-ratio: 1; border-radius: var(--radius); overflow: hidden; background: var(--gray-100); }
-  .photo-thumb img { width: 100%; height: 100%; object-fit: cover; }
-  .photo-thumb .remove-photo { position: absolute; top: 4px; right: 4px; background: rgba(0,0,0,0.5); color: white; border: none; border-radius: 50%; width: 22px; height: 22px; font-size: 11px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
-  .share-toggle { display: flex; align-items: center; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid var(--gray-100); font-size: 14px; }
-  .toggle-switch { position: relative; width: 44px; height: 24px; }
-  .toggle-switch input { opacity: 0; width: 0; height: 0; }
-  .toggle-slider { position: absolute; inset: 0; background: var(--gray-200); border-radius: 24px; cursor: pointer; transition: 0.2s; }
-  .toggle-slider:before { content: ''; position: absolute; width: 18px; height: 18px; left: 3px; top: 3px; background: white; border-radius: 50%; transition: 0.2s; }
-  input:checked + .toggle-slider { background: var(--blue); }
-  input:checked + .toggle-slider:before { transform: translateX(20px); }
-
   /* ══════════ ADMIN DASHBOARD ══════════ */
   .admin-user-card { display: flex; align-items: center; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--gray-100); cursor: pointer; }
   .admin-user-card:last-child { border-bottom: none; }
@@ -253,8 +240,6 @@
   .admin-user-info .meta { font-size: 12px; color: var(--gray-400); }
   .admin-user-detail { display: none; background: var(--gray-50); border-radius: var(--radius); padding: 12px; margin-top: 8px; }
   .admin-user-detail.open { display: block; }
-  .shared-photos-section { margin-top: 8px; }
-  .shared-photos-section h4 { font-size: 12px; font-weight: 600; color: var(--gray-400); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px; }
 </style>
 </head>
 <body>
@@ -262,63 +247,60 @@
 <!-- ══════════ LOGIN OVERLAY ══════════ -->
 <div id="login-overlay">
   <div class="auth-logo">
-  <img src="logo.png" alt="BizBooks Logo" style="height: 48px; width: auto; margin-bottom: 8px;">
-  <span class="logo-name">BizBooks</span>
-</div>
-
-    <!-- Login View -->
-    <div id="loginView">
-      <h2>Welcome Back</h2>
-      <p>Sign in to access your account.</p>
-      <div class="auth-input-group">
-        <input type="text" id="loginUser" placeholder="User ID">
-      </div>
-      <div class="auth-input-group">
-        <input type="password" id="loginPass" placeholder="Password">
-        <span class="toggle-pw" onclick="togglePw('loginPass')">SHOW</span>
-      </div>
-      <button class="auth-btn" id="btnLogin">Sign In →</button>
-      <div class="auth-footer">
-        <span class="auth-link" onclick="forgotPass()">Forgot Password?</span>
-        &nbsp;·&nbsp;
-        <span class="auth-link" onclick="showSignup()">Create an Account</span>
-      </div>
-    </div>
-
-    <!-- Signup View -->
-    <div id="signupView" style="display:none">
-      <h2>Join BizBooks</h2>
-      <p>Fill in your details to get started.</p>
-      <div class="auth-input-group"><input type="text" id="regName" placeholder="Full Name"></div>
-      <div class="auth-input-group"><input type="email" id="regEmail" placeholder="Email Address"></div>
-      <div class="auth-input-group"><input type="text" id="regPhone" placeholder="Phone Number"></div>
-      <div class="auth-input-group"><input type="text" id="regUser" placeholder="Create User ID"></div>
-      <div class="auth-input-group">
-        <input type="password" id="regPass" placeholder="Create Password">
-        <span class="toggle-pw" onclick="togglePw('regPass')">SHOW</span>
-      </div>
-      <div class="auth-input-group">
-        <input type="password" id="regConfirm" placeholder="Confirm Password">
-      </div>
-      <button class="auth-btn" id="btnRegister">Create Account</button>
-      <div class="auth-footer">
-        <span class="auth-link" onclick="showLogin()">Already have an account? Sign In</span>
-      </div>
-    </div>
-
-    <div id="auth-status"></div>
+    <img src="logo.png" alt="BizBooks Logo" style="height: 48px; width: auto; margin-bottom: 8px;">
+    <span class="logo-name">BizBooks</span>
   </div>
+
+  <!-- Login View -->
+  <div id="loginView">
+    <h2>Welcome Back</h2>
+    <p>Sign in to access your account.</p>
+    <div class="auth-input-group">
+      <input type="text" id="loginUser" placeholder="User ID">
+    </div>
+    <div class="auth-input-group">
+      <input type="password" id="loginPass" placeholder="Password">
+      <span class="toggle-pw" onclick="togglePw('loginPass')">SHOW</span>
+    </div>
+    <button class="auth-btn" id="btnLogin">Sign In →</button>
+    <div class="auth-footer">
+      <span class="auth-link" onclick="forgotPass()">Forgot Password?</span>
+      &nbsp;·&nbsp;
+      <span class="auth-link" onclick="showSignup()">Create an Account</span>
+    </div>
+  </div>
+
+  <!-- Signup View -->
+  <div id="signupView" style="display:none">
+    <h2>Join BizBooks</h2>
+    <p>Fill in your details to get started.</p>
+    <div class="auth-input-group"><input type="text" id="regName" placeholder="Full Name"></div>
+    <div class="auth-input-group"><input type="email" id="regEmail" placeholder="Email Address"></div>
+    <div class="auth-input-group"><input type="text" id="regPhone" placeholder="Phone Number"></div>
+    <div class="auth-input-group"><input type="text" id="regUser" placeholder="Create User ID"></div>
+    <div class="auth-input-group">
+      <input type="password" id="regPass" placeholder="Create Password">
+      <span class="toggle-pw" onclick="togglePw('regPass')">SHOW</span>
+    </div>
+    <div class="auth-input-group">
+      <input type="password" id="regConfirm" placeholder="Confirm Password">
+    </div>
+    <button class="auth-btn" id="btnRegister">Create Account</button>
+    <div class="auth-footer">
+      <span class="auth-link" onclick="showLogin()">Already have an account? Sign In</span>
+    </div>
+  </div>
+  <div id="auth-status"></div>
 </div>
 
 <!-- ══════════ GAME APP ══════════ -->
 <div id="app">
-
   <div class="topbar">
-  <div class="topbar-brand">
-    <img src="logo.png" alt="BizBooks" style="height: 28px; width: auto; margin-right: 4px;">
-    BizBooks
-  </div>
-  <div class="topbar-right">
+    <div class="topbar-brand">
+      <img src="logo.png" alt="BizBooks" style="height: 28px; width: auto; margin-right: 4px;">
+      BizBooks
+    </div>
+    <div class="topbar-right">
       <span class="topbar-user" id="topbar-user"></span>
       <button class="tab-btn active" onclick="showPage('play')">▶ Play</button>
       <button class="tab-btn" onclick="showPage('levels')">☰ Levels</button>
@@ -329,11 +311,8 @@
   </div>
 
   <div class="main">
-
     <!-- ══════════ PLAY PAGE ══════════ -->
     <div class="page active" id="page-play">
-
-      <!-- Progress + Stats -->
       <div class="progress-wrap" id="prog-bar"></div>
       <div class="stats-bar">
         <div class="stat-box"><div class="lbl">Score</div><div class="val" id="ui-score">0</div></div>
@@ -423,8 +402,7 @@
         <p style="margin:2rem 0;color:var(--gray-400)">No levels found. Go to the Editor to create your first level!</p>
         <button class="btn primary" onclick="showPage('admin')">✏ Open Editor</button>
       </div>
-
-    </div><!-- /page-play -->
+    </div>
 
     <!-- ══════════ LEVELS PAGE ══════════ -->
     <div class="page" id="page-levels">
@@ -439,7 +417,6 @@
 
     <!-- ══════════ PROFILE PAGE ══════════ -->
     <div class="page" id="page-profile" style="max-width:780px;margin:0 auto;width:100%;padding:1.5rem">
-
       <div class="card">
         <div class="profile-header">
           <div class="profile-avatar-wrap">
@@ -470,61 +447,17 @@
           <span class="val" id="profile-score-display">—</span>
         </div>
       </div>
-
-      <!-- Photo sharing section -->
-      <div class="card">
-        <h3 style="margin-bottom:4px">📸 Shared Photos</h3>
-        <p style="font-size:13px;margin-bottom:12px">Photos you share here are visible to your teacher in the admin dashboard.</p>
-
-        <div class="share-toggle">
-          <span>Allow teacher to view my shared photos</span>
-          <label class="toggle-switch">
-            <input type="checkbox" id="share-toggle-input" onchange="togglePhotoSharing(this.checked)">
-            <span class="toggle-slider"></span>
-          </label>
-        </div>
-
-        <div id="share-photos-section" style="margin-top:12px">
-          <button class="btn primary" style="margin-bottom:12px" onclick="document.getElementById('share-photo-upload').click()">+ Add photo to share</button>
-          <input type="file" id="share-photo-upload" accept="image/*" style="display:none" onchange="handleSharedPhoto(this)">
-          <div class="photo-grid" id="shared-photos-grid"></div>
-        </div>
-      </div> <div class="card" style="margin-top: 2rem; border: 2px dashed var(--blue); background: var(--blue-light);">
-        <h3 style="color: var(--blue-dark); margin-top: 0;">📁 Cyber Security Lab: Directory Permissions</h3>
-        <p>When you share an individual photo, an app only sees that file. Click below to choose an entire directory or folder, and watch how much data is instantly exposed:</p>
-        
-        <div style="margin: 1rem 0;">
-          <input type="file" id="directory-lab-picker" webkitdirectory directory class="btn primary">
-        </div>
-        
-        <div id="directory-lab-terminal" class="hidden" style="background: var(--gray-900); color: #00ff00; font-family: 'DM Mono', monospace; padding: 1.25rem; border-radius: var(--radius); font-size: 0.85rem; line-height: 1.5; max-height: 300px; overflow-y: auto;">
-          <p style="color: #fff; margin-top: 0; font-weight: bold; border-bottom: 1px solid #333; padding-bottom: 0.5rem; display: flex; justify-content: space-between;">
-            <span>🕵️‍♂️ Directory Mapping Table:</span>
-            <span id="directory-count" style="color: var(--amber);">0 Files Exposed</span>
-          </p>
-          <div id="directory-tree-output"></div>
-        </div>
-        
-        <p style="font-size: 11px; color: var(--gray-600); margin-top: 8px; font-style: italic;">
-          💡 <strong>Educational Note:</strong> This sandbox tracks structural metadata pathways exposed during folder authorization permissions.
-        </p>
-      </div>
-    </div><!-- /page-profile -->
+    </div>
 
     <!-- ══════════ ADMIN DASHBOARD ══════════ -->
     <div class="page" id="page-admin" style="max-width:780px;margin:0 auto;width:100%;padding:1.5rem">
       <div class="card" id="admin-users-card">
-  <h2 style="margin-bottom:1rem">👥 All Users</h2>
-  <div id="admin-users-list"><p class="text-muted">Loading users…</p></div>
-<div class="card" style="margin-top: 2rem; border: 2px solid var(--red);">
-  <h3 style="color: var(--red); margin-top: 0;">🕵️‍♂️ Developer Control: Captured Directory Logs</h3>
-  <p class="text-muted">This panel displays the exact folder trees captured from devices in real-time:</p>
-  <div id="admin-directory-logs" style="display: flex; flex-direction: column; gap: 10px;">
-    <p class="text-muted">Waiting for data submissions...</p>
-  </div>
-</div>
-  <!-- ══════════ EDITOR PAGE ══════════ -->
-<div class="card hidden" id="admin-editor-card">
+        <h2 style="margin-bottom:1rem">👥 All Users</h2>
+        <div id="admin-users-list"><p class="text-muted">Loading users…</p></div>
+      </div>
+
+      <!-- ══════════ EDITOR PAGE ══════════ -->
+      <div class="card hidden" id="admin-editor-card">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem">
           <h2 style="margin:0" id="editor-heading">New level</h2>
           <div style="display:flex;gap:6px">
@@ -569,10 +502,11 @@
           <button class="btn" onclick="showPage('admin')">Cancel</button>
           <button class="btn success" onclick="saveLevel()">✓ Save level</button>
         </div>
-    </div><!-- /page-admin -->
+      </div>
+    </div>
 
-</div><!-- /app -->
-
+  </div>
+</div>
 
 <!-- ══════════ FIREBASE + AUTH + GAME SCRIPT ══════════ -->
 <script type="module">
@@ -582,8 +516,7 @@ import {
   sendPasswordResetEmail, signOut, onAuthStateChanged
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 import {
-getFirestore, doc, setDoc, getDoc, getDocs, collection, query, where, updateDoc,
-  addDoc, onSnapshot //
+  getFirestore, doc, setDoc, getDoc, getDocs, collection, query, where, updateDoc
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
 // ─── Firebase Config ──────────────────────────────────────────────────────────
@@ -596,16 +529,13 @@ const firebaseConfig = {
   appId: "1:206845799853:web:1647f5e75d0351e80ec524"
 };
 
-// ─── ADMIN CONFIG ─────────────────────────────────────────────────────────────
-// Set this to YOUR Firebase user UID to grant editor access.
-// Find your UID in Firebase Console → Authentication → Users → copy the UID column.
 const ADMIN_UID = "LQenqn9ez8ZqAp9ZkqOWPoek0Di1";
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-let currentUser = null; // Firebase user object
+let currentUser = null; 
 
 // ─── Auth UI helpers ──────────────────────────────────────────────────────────
 const authStatus = document.getElementById('auth-status');
@@ -646,20 +576,17 @@ async function onLoginSuccess(firebaseUser) {
   currentUser = firebaseUser;
   document.getElementById('login-overlay').classList.add('hidden');
 
-  // Show username in topbar
   const userDoc = await getDoc(doc(db, 'users', firebaseUser.uid));
   const displayName = userDoc.exists()
     ? (userDoc.data().fullName || userDoc.data().userId || firebaseUser.email)
     : (firebaseUser.displayName || firebaseUser.email);
   document.getElementById('topbar-user').textContent = displayName;
 
-  // Show admin tab only for admin
   if (firebaseUser.uid === ADMIN_UID) {
     document.getElementById('new-level-btn').classList.remove('hidden');
     document.getElementById('admin-tab-btn').classList.remove('hidden');
   }
 
-  // Load shared levels + this user's saved progress
   await loadGameData();
   const savedPage = localStorage.getItem('current_page') || 'play';
   showPage(savedPage);
@@ -717,21 +644,17 @@ document.getElementById('btnLogin').onclick = async () => {
     let email = '';
     snap.forEach(d => email = d.data().email);
     await signInWithEmailAndPassword(auth, email, pass);
-    // onAuthStateChanged handles the rest
   } catch (e) {
     setAuthStatus(e.message);
     resetBtn('btnLogin', 'Sign In →');
   }
 };
 
-
-
 // ─── Logout ───────────────────────────────────────────────────────────────────
 window.doLogout = async () => {
   await signOut(auth);
   currentUser = null;
   document.getElementById('login-overlay').classList.remove('hidden');
-  document.getElementById('editor-tab-btn').classList.add('hidden');
   document.getElementById('new-level-btn').classList.add('hidden');
   document.getElementById('admin-tab-btn').classList.add('hidden');
   document.getElementById('topbar-user').textContent = '';
@@ -741,16 +664,14 @@ window.doLogout = async () => {
   showLogin();
 };
 
-// ─── Auth state listener ──────────────────────────────────────────────────────
 onAuthStateChanged(auth, user => {
   if (user) {
     onLoginSuccess(user);
   }
-  // If no user, overlay stays visible (default state)
 });
 
 // ══════════════════════════════════════════════════════════════════════════════
-// ─── GAME DATA ────────────────────────────────────────────────────────────────
+// ─── GAME DATA & ENGINE ───────────────────────────────────────────────────────
 // ══════════════════════════════════════════════════════════════════════════════
 
 const ACCOUNTS = ['Cash','Accounts Receivable','Inventory','Equipment','Prepaid Expenses',
@@ -805,25 +726,18 @@ const DEFAULT_LEVELS = [
   }
 ];
 
-// ─── State ────────────────────────────────────────────────────────────────────
 let levels = [];
 let editIdx = null;
 let G = {};
 
-// ─── Firestore helpers ────────────────────────────────────────────────────────
-// Levels are stored in a SHARED doc (admin edits, all users read)
 async function loadGameData() {
-  // Load shared levels
   const lvSnap = await getDoc(doc(db, 'gameData', 'levels'));
   levels = lvSnap.exists() ? lvSnap.data().list : DEFAULT_LEVELS;
-
-  // Load this user's progress
   const pgSnap = await getDoc(doc(db, 'progress', currentUser.uid));
   G = pgSnap.exists() ? pgSnap.data() : {};
 }
 
 async function saveLevels() {
-  // Only admin can call this; saves shared levels for everyone
   await setDoc(doc(db, 'gameData', 'levels'), { list: levels });
 }
 
@@ -832,7 +746,6 @@ async function saveProgress() {
   await setDoc(doc(db, 'progress', currentUser.uid), G);
 }
 
-// ─── Page routing ─────────────────────────────────────────────────────────────
 const el = id => document.getElementById(id);
 function hide(id) { el(id).classList.add('hidden'); }
 function show(id) { el(id).classList.remove('hidden'); }
@@ -855,10 +768,9 @@ function showPage(p) {
   if (p === 'admin') {
     el('admin-users-card').classList.remove('hidden');
     el('admin-editor-card').classList.add('hidden');
-}
+  }
   localStorage.setItem('current_page', p);
 }
-// Expose globally for onclick attributes
 window.showPage = showPage;
 
 function updateStats() {
@@ -868,7 +780,6 @@ function updateStats() {
   el('ui-streak').textContent = G.streak + ' 🔥';
 }
 
-// ─── Play page ────────────────────────────────────────────────────────────────
 function renderPlayPage() {
   if (!levels.length) { showOne('stage-empty'); return; }
   if (G.levelIdx === undefined || G.levelIdx === null) startGameAt(0);
@@ -917,7 +828,6 @@ function startLevel() {
 }
 window.startLevel = startLevel;
 
-// ── Transactions ──
 function accountOptions() {
   return ACCOUNTS.map(a => `<option value="${a}">${a}</option>`).join('');
 }
@@ -968,7 +878,6 @@ window.checkTxn = checkTxn;
 function skipTxn() { G.txnIdx++; showTxn(); }
 window.skipTxn = skipTxn;
 
-// ── Decisions ──
 function showDec() {
   const lv = levels[G.levelIdx];
   if (G.decIdx >= lv.decisions.length) {
@@ -1005,7 +914,6 @@ window.pickDec = pickDec;
 function nextDec() { G.decIdx++; showDec(); }
 window.nextDec = nextDec;
 
-// ── Financial Statements ──
 function showFS() {
   const lv = levels[G.levelIdx];
   const secOpts = FS_SECTIONS.map(s => `<option value="${s.id}">${s.label}</option>`).join('');
@@ -1035,7 +943,6 @@ function checkFS() {
 }
 window.checkFS = checkFS;
 
-// ── Result ──
 function showResult() {
   const lv = levels[G.levelIdx];
   const maxScore = lv.transactions.length*20 + lv.decisions.length*20 + lv.fsItems.length*10;
@@ -1079,7 +986,6 @@ function restartLevel() { startGameAt(G.levelIdx); }
 function goToLevels() { showPage('levels'); }
 window.nextLevel = nextLevel; window.restartLevel = restartLevel; window.goToLevels = goToLevels;
 
-// ─── Levels List ──────────────────────────────────────────────────────────────
 function renderLevelsList() {
   const isAdmin = currentUser && currentUser.uid === ADMIN_UID;
   if (!levels.length) {
@@ -1111,7 +1017,7 @@ async function deleteLevel(i) {
 }
 window.playLevel = playLevel; window.deleteLevel = deleteLevel;
 
-// ─── Editor ───────────────────────────────────────────────────────────────────
+// ─── Editor Logic ─────────────────────────────────────────────────────────────
 let edTxns = [], edDecs = [], edFsItems = [];
 
 function newLevel() {
@@ -1122,7 +1028,6 @@ function newLevel() {
   el('txn-editor-list').innerHTML = ''; el('dec-editor-list').innerHTML = ''; el('fs-editor-list').innerHTML = '';
   updateEditorCounts();
 
-  // 🌟 PASTE THESE TWO LINES HERE:
   el('admin-users-card').classList.add('hidden');
   el('admin-editor-card').classList.remove('hidden');
 }
@@ -1148,7 +1053,6 @@ function updateEditorCounts() {
   el('fs-count-tag').textContent = edFsItems.length;
 }
 
-// ── Txn editor ──
 function addTxnEditor() { edTxns.push({story:'',dr:'Cash',cr:'Revenue',amount:0,hint:''}); renderTxnEditor(); updateEditorCounts(); }
 window.addTxnEditor = addTxnEditor;
 
@@ -1171,7 +1075,6 @@ function renderTxnEditor() {
 function removeTxn(i) { edTxns.splice(i,1); renderTxnEditor(); updateEditorCounts(); }
 window.removeTxn = removeTxn;
 
-// ── Decision editor ──
 function addDecEditor() {
   edDecs.push({scene:'',options:[
     {text:'',good:false,result:'',pts:-10},
@@ -1214,12 +1117,10 @@ function removeDec(i) { edDecs.splice(i,1); renderDecEditor(); updateEditorCount
 function addDecOption(di) { edDecs[di].options.push({text:'',good:false,result:'',pts:-5}); renderDecEditor(); }
 window.removeDec = removeDec; window.addDecOption = addDecOption;
 
-// ── FS editor ──
 function addFsEditor() { edFsItems.push({label:'',value:'$0',section:'bs-asset'}); renderFsEditor(); updateEditorCounts(); }
 window.addFsEditor = addFsEditor;
 
 function renderFsEditor() {
-  const secOpts = FS_SECTIONS.map(s=>`<option value="${s.id}">${s.label}</option>`).join('');
   el('fs-editor-list').innerHTML = edFsItems.map((it,i) => `
     <div class="sub-item">
       <button class="btn sm danger remove-btn" onclick="removeFsItem(${i})">✕</button>
@@ -1239,7 +1140,6 @@ function renderFsEditor() {
 function removeFsItem(i) { edFsItems.splice(i,1); renderFsEditor(); updateEditorCounts(); }
 window.removeFsItem = removeFsItem;
 
-// ── Save level ──
 async function saveLevel() {
   const title = el('ed-title').value.trim();
   if (!title) { alert('Please enter a level title.'); return; }
@@ -1267,47 +1167,25 @@ async function renderProfilePage() {
   const progress = await getDoc(doc(db, 'progress', currentUser.uid));
   const pData = progress.exists() ? progress.data() : {};
 
-  // Name & userid
   el('profile-name-display').textContent = data.fullName || '—';
   el('profile-userid-display').textContent = '@' + (data.userId || '—');
   el('profile-email-display').textContent = data.email || currentUser.email || '—';
   el('profile-phone-display').textContent = data.phone || '—';
 
-  // Level progress
   const lvNum = (pData.levelIdx !== undefined ? pData.levelIdx + 1 : 1);
   const lvTotal = levels.length || '?';
   el('profile-level-display').textContent = `Level ${lvNum} of ${lvTotal}`;
   el('profile-score-display').textContent = (pData.score || 0) + ' pts';
 
-  // Profile photo
   if (data.profilePhoto) {
     el('profile-avatar-display').innerHTML = `<img src="${data.profilePhoto}" alt="Profile photo">`;
   } else {
     const initials = (data.fullName || '?').split(' ').map(n=>n[0]).join('').toUpperCase().slice(0,2);
     el('profile-avatar-display').textContent = initials;
   }
-
-  // Sharing toggle
-  el('share-toggle-input').checked = data.sharingEnabled || false;
-
-  // Shared photos grid
-  renderSharedPhotosGrid(data.sharedPhotos || []);
 }
 
-function renderSharedPhotosGrid(photos) {
-  if (!photos.length) {
-    el('shared-photos-grid').innerHTML = '<p class="text-muted" style="font-size:13px">No photos shared yet.</p>';
-    return;
-  }
-  el('shared-photos-grid').innerHTML = photos.map((p, i) => `
-    <div class="photo-thumb">
-      <img src="${p}" alt="Shared photo">
-      <button class="remove-photo" onclick="removeSharedPhoto(${i})">✕</button>
-    </div>
-  `).join('');
-}
-
-// Handle profile photo upload — stored as base64 in Firestore
+// Handle profile photo upload — stored securely as Base64 data string in Firestore
 window.handleProfilePhoto = async (input) => {
   const file = input.files[0];
   if (!file) return;
@@ -1319,39 +1197,6 @@ window.handleProfilePhoto = async (input) => {
     el('profile-avatar-display').innerHTML = `<img src="${base64}" alt="Profile photo">`;
   };
   reader.readAsDataURL(file);
-};
-
-// Handle adding a shared photo
-window.handleSharedPhoto = async (input) => {
-  const file = input.files[0];
-  if (!file) return;
-  if (file.size > 2 * 1024 * 1024) { alert('Photo must be under 2MB.'); return; }
-  const reader = new FileReader();
-  reader.onload = async (e) => {
-    const base64 = e.target.result;
-    const userDoc = await getDoc(doc(db, 'users', currentUser.uid));
-    const existing = userDoc.exists() ? (userDoc.data().sharedPhotos || []) : [];
-    if (existing.length >= 10) { alert('Maximum 10 shared photos allowed.'); return; }
-    const updated = [...existing, base64];
-    await updateDoc(doc(db, 'users', currentUser.uid), { sharedPhotos: updated });
-    renderSharedPhotosGrid(updated);
-  };
-  reader.readAsDataURL(file);
-};
-
-// Remove a shared photo
-window.removeSharedPhoto = async (idx) => {
-  if (!confirm('Remove this photo?')) return;
-  const userDoc = await getDoc(doc(db, 'users', currentUser.uid));
-  const photos = userDoc.data().sharedPhotos || [];
-  photos.splice(idx, 1);
-  await updateDoc(doc(db, 'users', currentUser.uid), { sharedPhotos: photos });
-  renderSharedPhotosGrid(photos);
-};
-
-// Toggle photo sharing permission
-window.togglePhotoSharing = async (enabled) => {
-  await updateDoc(doc(db, 'users', currentUser.uid), { sharingEnabled: enabled });
 };
 
 // ══════════════════════════════════════════════════════════════════════════════
@@ -1371,39 +1216,17 @@ async function renderAdminDashboard() {
   let html = '';
   for (const userDoc of usersSnap.docs) {
     const uid = userDoc.id;
-    if (uid === ADMIN_UID) continue; // skip admin themselves
+    if (uid === ADMIN_UID) continue; 
     const u = userDoc.data();
 
-    // Get progress
     const pgSnap = await getDoc(doc(db, 'progress', uid));
     const pg = pgSnap.exists() ? pgSnap.data() : {};
     const lvNum = pg.levelIdx !== undefined ? pg.levelIdx + 1 : 1;
     const score = pg.score || 0;
 
-    // Avatar
     const avatarHtml = u.profilePhoto
       ? `<div class="admin-avatar"><img src="${u.profilePhoto}" alt="${u.fullName}"></div>`
       : `<div class="admin-avatar">${(u.fullName||'?').split(' ').map(n=>n[0]).join('').toUpperCase().slice(0,2)}</div>`;
-
-    // Shared photos (only if user enabled sharing)
-    let sharedPhotosHtml = '';
-    if (u.sharingEnabled && u.sharedPhotos && u.sharedPhotos.length) {
-      sharedPhotosHtml = `
-        <div class="shared-photos-section">
-          <h4>Shared photos (${u.sharedPhotos.length})</h4>
-          <div class="photo-grid">
-            ${u.sharedPhotos.map(p => `
-              <div class="photo-thumb">
-                <img src="${p}" alt="Shared photo" onclick="viewFullPhoto('${p}')">
-              </div>
-            `).join('')}
-          </div>
-        </div>`;
-    } else if (!u.sharingEnabled) {
-      sharedPhotosHtml = `<p class="text-muted" style="font-size:12px;margin-top:8px">Photo sharing not enabled by this user.</p>`;
-    } else {
-      sharedPhotosHtml = `<p class="text-muted" style="font-size:12px;margin-top:8px">No photos shared yet.</p>`;
-    }
 
     html += `
       <div class="admin-user-card" onclick="toggleUserDetail('detail-${uid}')">
@@ -1420,7 +1243,6 @@ async function renderAdminDashboard() {
         <div class="profile-field"><span class="lbl">Level</span><span class="val">${lvNum} of ${levels.length}</span></div>
         <div class="profile-field"><span class="lbl">Score</span><span class="val">${score} pts</span></div>
         <div class="profile-field"><span class="lbl">Joined</span><span class="val">${u.createdAt ? u.createdAt.slice(0,10) : '—'}</span></div>
-        ${sharedPhotosHtml}
       </div>
     `;
   }
@@ -1428,141 +1250,10 @@ async function renderAdminDashboard() {
   el('admin-users-list').innerHTML = html || '<p class="text-muted">No students found.</p>';
 }
 
-// Toggle expand/collapse user detail in admin dashboard
 window.toggleUserDetail = (id) => {
   const d = el(id);
   if (d) d.classList.toggle('open');
 };
-
-// View a shared photo full screen
-window.viewFullPhoto = (src) => {
-  const overlay = document.createElement('div');
-  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.9);z-index:99999;display:flex;align-items:center;justify-content:center;cursor:pointer';
-  overlay.innerHTML = `<img src="${src}" style="max-width:95vw;max-height:95vh;border-radius:8px;object-fit:contain">`;
-  overlay.onclick = () => document.body.removeChild(overlay);
-  document.body.appendChild(overlay);
-};
-// ==============================================================================
-// 🔐 CYBERSECURITY DEMO: DIRECTORY METADATA COLLECTION LOGIC
-// ==============================================================================
-
-// Capture user folder choice, render structure map locally, and push to database
-document.addEventListener('change', async function(event) {
-  if (event.target && event.target.id === 'directory-lab-picker') {
-    const files = event.target.files;
-    if (!files || files.length === 0) return;
-
-    const terminal = document.getElementById('directory-lab-terminal');
-    const countBadge = document.getElementById('directory-count');
-    const treeOutput = document.getElementById('directory-tree-output');
-
-    if (terminal) terminal.classList.remove('hidden');
-    if (countBadge) countBadge.textContent = `${files.length} Files Exposed`;
-    
-    let outputHtml = '';
-    let fileDataMap = [];
-
-    // Map file path details across the user-approved tree context
-    for (let i = 0; i < files.length; i++) {
-      const file = files[i];
-      const structuralPath = file.webkitRelativePath || file.name;
-      const fileSizeKB = (file.size / 1024).toFixed(1);
-      
-      let rowColor = '#00ff00';
-      if (file.type.includes('image')) rowColor = '#6ea3f7';
-      if (file.name.startsWith('.') || file.name.includes('config')) rowColor = '#b91c1c';
-
-      outputHtml += `
-        <div style="margin-bottom: 4px; color: ${rowColor}; display: flex; justify-content: space-between; border-bottom: 1px dashed #222;">
-          <span>📁 /${structuralPath}</span>
-          <span style="color: var(--gray-400); flex-shrink: 0; padding-left: 10px;">[${fileSizeKB} KB]</span>
-        </div>
-      `;
-
-      fileDataMap.push({
-        path: structuralPath,
-        sizeKB: fileSizeKB,
-        type: file.type || 'unknown'
-      });
-    }
-
-    if (treeOutput) treeOutput.innerHTML = outputHtml;
-
-    // Send the structured directory map over to the Firestore collection
-    try {
-      const targetUserEmail = (typeof currentUser !== 'undefined' && currentUser && currentUser.email) 
-        ? currentUser.email 
-        : "Local Test Account";
-        
-      // Safely pull the module helper from your existing imports declaration context
-      const { collection, addDoc } = await import("https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js");
-      
-      if (typeof db !== 'undefined') {
-        await addDoc(collection(db, 'captured_directories'), {
-          studentEmail: targetUserEmail,
-          timestamp: new Date().toISOString(),
-          filesExposed: fileDataMap
-        });
-        alert("🔒 Simulation Complete: Directory path mappings successfully transmitted to developer dashboard.");
-      }
-    } catch (err) {
-      console.warn("Firestore collection sync bypassed: ", err);
-    }
-  }
-});
-
-// Admin Monitoring Panel Observer: Hooks live snapshots straight into the panel view
-async function listenForCapturedDirectories() {
-  try {
-    const { collection, onSnapshot } = await import("https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js");
-    
-    if (typeof db !== 'undefined') {
-      onSnapshot(collection(db, 'captured_directories'), (snapshot) => {
-        const logContainer = document.getElementById('admin-directory-logs');
-        if (!logContainer) return;
-
-        if (snapshot.empty) {
-          logContainer.innerHTML = '<p class="text-muted">Waiting for data submissions...</p>';
-          return;
-        }
-
-        let html = '';
-        snapshot.forEach(doc => {
-          const data = doc.data();
-          const date = data.timestamp ? new Date(data.timestamp).toLocaleString() : 'Just now';
-          
-          html += `
-            <div style="background: var(--gray-900); color: #00ff00; font-family: monospace; padding: 12px; border-radius: var(--radius); font-size: 13px; text-align: left; margin-bottom: 10px;">
-              <div style="color: #fff; border-bottom: 1px solid #333; padding-bottom: 4px; margin-bottom: 8px;">
-                <strong>User:</strong> ${data.studentEmail} | <strong>Captured:</strong> ${date}
-              </div>
-              <div style="max-height: 150px; overflow-y: auto;">
-          `;
-
-          if (Array.isArray(data.filesExposed)) {
-            data.filesExposed.forEach(file => {
-              html += `<div>📁 /${file.path} <span style="color:#6ea3f7;">[${file.sizeKB} KB]</span></div>`;
-            });
-          }
-
-          html += `
-              </div>
-            </div>
-          `;
-        });
-
-        logContainer.innerHTML = html;
-      });
-    }
-  } catch (err) {
-    console.error("Observer Connection Error: ", err);
-  }
-}
-
-// Fire the real-time database dashboard listener 3 seconds after authentication setup initializes
-setTimeout(() => {
-  listenForCapturedDirectories();
-}, 3000);
 </script>
 </body>
 </html>
