@@ -80,11 +80,24 @@
   #signupView input { margin-bottom: 10px; }
 
   /* ══════════ GAME LAYOUT ══════════ */
-  #app { display: flex; flex-direction: column; min-height: 100vh; }
+  #app { 
+    display: flex; 
+    flex-direction: column;
+    min-height: 100vh; 
+    width: 100%;
+  }
+
   .topbar {
-    background: var(--surface); border-bottom: 1px solid var(--gray-200);
-    padding: 0 1.5rem; height: 56px; display: flex; align-items: center;
-    justify-content: space-between; position: sticky; top: 0; z-index: 100;
+    background: var(--surface); 
+    border-bottom: 1px solid var(--gray-200);
+    padding: 0 1.5rem; 
+    height: 56px; 
+    display: flex; 
+    align-items: center;
+    justify-content: space-between; 
+    position: sticky; 
+    top: 0; 
+    z-index: 100;
   }
   .topbar-brand { font-size: 17px; font-weight: 600; color: var(--blue); display: flex; align-items: center; gap: 8px; }
   .topbar-brand span { font-size: 20px; }
@@ -588,12 +601,23 @@ async function onLoginSuccess(firebaseUser) {
   let userIdVal = 'student';
   let photoData = '';
 
-  if (userDoc.exists()) {
-    const uData = userDoc.data();
-    displayName = uData.fullName || uData.userId || firebaseUser.email;
-    userIdVal = uData.userId || 'student';
-    photoData = uData.profilePhoto || '';
+if (userDoc.exists()) {
+  const uData = userDoc.data();
+  const userIdVal = uData.userId || 'student';
+  const displayName = uData.fullName || 'User';
+  
+  // 1. Update the dropdown label text
+  document.getElementById('menu-user-id').textContent = '@' + userIdVal;
+  
+  // 2. Set the trigger icon avatar initials if there's no photo uploaded yet
+  const triggerBtn = document.getElementById('nav-menu-trigger');
+  if (uData.profilePhoto) {
+    triggerBtn.innerHTML = `<img src="${uData.profilePhoto}" style="width:100%; height:100%; object-fit:cover;">`;
+  } else {
+    const initials = displayName.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+    triggerBtn.textContent = initials || '👤';
   }
+}
 
   // Update dropdown tracking tags
   document.getElementById('menu-user-id').textContent = '@' + userIdVal;
@@ -797,9 +821,22 @@ function showPage(p) {
 }
 window.showPage = showPage;
 
+// Expose the menu toggle to the global HTML window scope
 window.toggleNavMenu = () => {
-  document.getElementById('dropdown-nav-panel').classList.toggle('hidden');
+  const panel = document.getElementById('dropdown-nav-panel');
+  if (panel) {
+    panel.classList.toggle('hidden');
+  }
 };
+
+// Optional: Close the menu if a user clicks anywhere outside of it
+window.addEventListener('click', (e) => {
+  const trigger = document.getElementById('nav-menu-trigger');
+  const panel = document.getElementById('dropdown-nav-panel');
+  if (trigger && panel && !trigger.contains(e.target) && !panel.contains(e.target)) {
+    panel.classList.add('hidden');
+  }
+});
 
 function updateStats() {
   el('ui-score').textContent = G.score;
