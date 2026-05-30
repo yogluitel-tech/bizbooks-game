@@ -300,15 +300,22 @@
       <img src="logo.png" alt="BizBooks" style="height: 28px; width: auto; margin-right: 4px;">
       BizBooks
     </div>
-    <div class="topbar-right">
-      <span class="topbar-user" id="topbar-user"></span>
-      <button class="tab-btn active" onclick="showPage('play')">▶ Play</button>
-      <button class="tab-btn" onclick="showPage('levels')">☰ Levels</button>
-      <button class="tab-btn hidden" id="admin-tab-btn" onclick="showPage('admin')">👥 Admin</button>
-      <button class="tab-btn" onclick="showPage('profile')">👤 Profile</button>
-      <button class="tab-btn logout" onclick="doLogout()">⏻ Logout</button>
-    </div>
+<div class="topbar-right" style="position: relative;">
+  <button class="tab-btn active" onclick="showPage('play')">▶ Play</button>
+  
+  <div id="nav-menu-trigger" onclick="toggleNavMenu()" style="width: 36px; height: 36px; border-radius: 50%; background: var(--blue-light); color: var(--blue-dark); display: flex; align-items: center; justify-content: center; font-weight: 600; cursor: pointer; border: 2px solid #c7d9fc; overflow: hidden; margin-left: 8px;">
+    👤
   </div>
+
+  <div id="dropdown-nav-panel" class="hidden" style="position: absolute; top: 46px; right: 0; background: white; border: 1px solid var(--gray-200); border-radius: var(--radius); box-shadow: 0 4px 12px rgba(0,0,0,0.1); width: 180px; display: flex; flex-direction: column; padding: 6px; z-index: 1000;">
+    <div id="menu-user-id" style="font-size: 11px; color: var(--gray-400); padding: 6px 10px; border-bottom: 1px solid var(--gray-100); margin-bottom: 4px; font-weight: 500; text-overflow: ellipsis; overflow: hidden; white-space: nowrap;">@user</div>
+    <button class="tab-btn" onclick="showPage('levels'); toggleNavMenu()" style="text-align: left; width: 100%; padding: 8px 10px;">☰ All Levels</button>
+    <button class="tab-btn hidden" id="admin-tab-btn" onclick="showPage('admin'); toggleNavMenu()" style="text-align: left; width: 100%; padding: 8px 10px;">👥 Admin Control</button>
+    <button class="tab-btn" onclick="showPage('profile'); toggleNavMenu()" style="text-align: left; width: 100%; padding: 8px 10px;">👤 View Profile</button>
+    <hr style="border: none; border-top: 1px solid var(--gray-100); margin: 4px 0;">
+    <button class="tab-btn logout" onclick="doLogout(); toggleNavMenu()" style="text-align: left; width: 100%; padding: 8px 10px;">⏻ Sign Out</button>
+  </div>
+</div>
 
   <div class="main">
     <!-- ══════════ PLAY PAGE ══════════ -->
@@ -577,10 +584,27 @@ async function onLoginSuccess(firebaseUser) {
   document.getElementById('login-overlay').classList.add('hidden');
 
   const userDoc = await getDoc(doc(db, 'users', firebaseUser.uid));
-  const displayName = userDoc.exists()
-    ? (userDoc.data().fullName || userDoc.data().userId || firebaseUser.email)
-    : (firebaseUser.displayName || firebaseUser.email);
-  document.getElementById('topbar-user').textContent = displayName;
+  let displayName = firebaseUser.email;
+  let userIdVal = 'student';
+  let photoData = '';
+
+  if (userDoc.exists()) {
+    const uData = userDoc.data();
+    displayName = uData.fullName || uData.userId || firebaseUser.email;
+    userIdVal = uData.userId || 'student';
+    photoData = uData.profilePhoto || '';
+  }
+
+  // Update dropdown tracking tags
+  document.getElementById('menu-user-id').textContent = '@' + userIdVal;
+
+  // Update navigation button avatar
+  const triggerBtn = document.getElementById('nav-menu-trigger');
+  if (photoData) {
+    triggerBtn.innerHTML = `<img src="${photoData}" style="width:100%; height:100%; object-fit:cover;">`;
+  } else {
+    triggerBtn.textContent = displayName.split(' ').map(n=>n[0]).join('').toUpperCase().slice(0,2);
+  }
 
   if (firebaseUser.uid === ADMIN_UID) {
     document.getElementById('new-level-btn').classList.remove('hidden');
@@ -773,6 +797,10 @@ function showPage(p) {
 }
 window.showPage = showPage;
 
+window.toggleNavMenu = () => {
+  document.getElementById('dropdown-nav-panel').classList.toggle('hidden');
+};
+
 function updateStats() {
   el('ui-score').textContent = G.score;
   el('ui-cash').textContent = '$' + G.cash;
@@ -844,8 +872,11 @@ function showTxn() {
   const opts = accountOptions();
   el('txn-story').innerHTML = `<div class="avatar av-sp">SP</div><div class="bubble">${t.story}</div>`;
   el('sel-dr').innerHTML = opts; el('sel-cr').innerHTML = opts;
-  el('sel-dr').value = t.dr; el('sel-cr').value = t.cr;
-  el('txn-amt').value = t.amount;
+  el('sel-dr').innerHTML = '<option value="" selected disabled>-- Select Debit Account --</option>' + accountOptions();
+  el('sel-cr').innerHTML = '<option value="" selected disabled>-- Select Credit Account --</option>' + accountOptions();
+  el('sel-dr').value = ""; 
+  el('sel-cr').value = "";
+  el('txn-amt').value = "";
   el('txn-hint').textContent = '💡 Hint: ' + t.hint;
   el('txn-fb').innerHTML = '';
   el('txn-prog').textContent = `Transaction ${G.txnIdx+1} of ${lv.transactions.length}`;
@@ -857,8 +888,13 @@ function checkTxn() {
   const lv = levels[G.levelIdx];
   const t = lv.transactions[G.txnIdx];
   const dr = el('sel-dr').value, cr = el('sel-cr').value, amt = parseInt(el('txn-amt').value);
-  const ok = dr === t.dr && cr === t.cr && amt === t.amount;
-  if (ok) {
+if (!dr || !cr || isNaN(amt)) {
+    el('txn-fb').innerHTML = `<div class="feedback fb-err">⚠️ Please select both ledger accounts and enter a valid non-zero amount.</div>`;
+    return;
+  }
+
+  const ok = dr === t.dr && cr === t.cr && amt === t.amount;  
+if (ok) {
     G.score += 20; G.streak++; G.correctTxn++; G.cash += t.amount;
     el('txn-fb').innerHTML = `<div class="feedback fb-ok">✓ Correct! Dr <b>${dr}</b> / Cr <b>${cr}</b> for $${amt}. +20 pts</div>`;
     updateStats(); saveProgress();
